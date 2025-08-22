@@ -1,49 +1,132 @@
+using Device.FingerPrint.Core.Services;
+using Device.FingerPrint.Gateway.Handlers;
+using Device.FingerPrint.Gateway.Services;
+using Device.FingerPrint.Gateway.Middleware;
+using Device.FingerPrint.Redis;
+using Fanex.Logging;
+using Fanex.Logging.Sentry;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Ocelot.Cache.CacheManager;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
+using Sentry;
+using StackExchange.Redis.Extensions.Core;
+using StackExchange.Redis.Extensions.Core.Abstractions;
+using StackExchange.Redis.Extensions.Core.Configuration;
+using StackExchange.Redis.Extensions.Core.Implementations;
+using StackExchange.Redis.Extensions.MsgPack;
+using ILogger = Fanex.Logging.ILogger;
+using Prometheus;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+        // Add services to the container.
+
+        builder.Services.AddHealthChecks();
+
+        // Add memory cache
+        builder.Services.AddMemoryCache();
+        
+        // Add HttpContextAccessor for IPCaptureHandler
+        builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-// Add Swagger/OpenAPI services
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+builder.Services.AddSwaggerGen();
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+builder.Services
+    .AddOcelot(builder.Configuration)
+    .AddCacheManager(x =>
     {
-        Title = "FPS AI Powered Device Fingerprint Gateway API",
-        Version = "v1",
-        Description = "API Gateway for Device Fingerprint Management with AI capabilities",
-        Contact = new Microsoft.OpenApi.Models.OpenApiContact
-        {
-            Name = "FPS Team",
-            Email = "support@fps.com"
-        }
-    });
-});
+        x.WithDictionaryHandle();
+    })
+    .AddDelegatingHandler<ValidateHandler>()
+    .AddDelegatingHandler<IPCaptureHandler>()
+    .AddDelegatingHandler<MobileRequestHandler>();
+
+var appSettings = new Device.FingerPrint.Gateway.AppSettings(builder.Configuration);
+
+var gatewaySetting = new GatewaySetting(builder.Configuration);
+builder.Services.AddSingleton<IGatewaySetting>(gatewaySetting);
+
+builder.Services.AddSingleton<Device.FingerPrint.Gateway.IAppSettings>(appSettings);
+builder.Services.AddSingleton<ILogger, Logger>();
+
+var redisConfiguration = builder.Configuration.GetSection("Redis").Get<RedisConfiguration>();
+
+// Cải thiện cấu hình Redis để tăng tính ổn định
+if (redisConfiguration != null)
+{
+    // Tăng timeout và retry settings
+    redisConfiguration.ConnectTimeout = 10000;
+    redisConfiguration.ConnectRetry = 10;
+    redisConfiguration.AbortOnConnectFail = false;
+    
+    // Cấu hình connection pool
+    redisConfiguration.PoolSize = 50;
+}
+
+builder.Services.AddSingleton(redisConfiguration);
+
+// Cấu hình Redis với retry policy và circuit breaker
+builder.Services.AddSingleton<IRedisClient, RedisClient>();
+builder.Services.AddSingleton<IRedisConnectionPoolManager, RedisConnectionPoolManager>();
+builder.Services.AddSingleton<ISerializer, MsgPackObjectSerializer>();
+builder.Services.AddSingleton<IRedisService, RedisService>();
+
+builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
+builder.Services.AddSingleton<IGatewayService, GatewayService>();
+
+LogManager
+          .SetDefaultLogCategory("FPS-Gateway-API")
+          .Use(new List<ILogEngine>
+          {
+                    new SentryLogging(new SentryEngineOptions
+                    {
+                        Dsn = new Dsn(appSettings.SentryDsn)
+                    })
+          });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    
-    // Enable Swagger UI
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "FPS AI Powered Device Fingerprint Gateway API v1");
-        c.RoutePrefix = "swagger";
-        c.DocumentTitle = "FPS AI Powered Device Fingerprint Gateway API";
-    });
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+// Thêm Redis health check middleware
+app.UseMiddleware<RedisHealthMiddleware>();
+
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseAuthorization();
 
-app.MapControllers();
+// Use the Prometheus middleware
+app.UseMetricServer();
+app.UseHttpMetrics();
+
+MetricHttpService.PublicDataToGateway(gatewaySetting.GatewayInfo);
+
+app.UseHealthChecks("/healthz", new HealthCheckOptions
+{
+    Predicate = _ => true
+});
+
+// Ocelot middleware phải được đặt sau routing và trước endpoints
+await app.UseOcelot();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers(); // Map controllers
+});
+
+LogService.Info(string.Format("This is Gateway API {0} has been started at {1}", typeof(Program).FullName, DateTimeOffset.Now));
 
 app.Run();
