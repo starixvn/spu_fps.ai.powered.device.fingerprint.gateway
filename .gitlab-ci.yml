@@ -18,7 +18,7 @@
 # See other available tags for .NET Core: https://hub.docker.com/_/microsoft-dotnet
 # Learn more about Docker tags: https://docs.docker.com/glossary/?term=tag
 # and the Docker itself: https://opensource.com/resources/what-docker
-image: mcr.microsoft.com/dotnet/sdk:7.0
+image: mcr.microsoft.com/dotnet/sdk:8.0
 
 # ### Define variables
 #
@@ -69,7 +69,7 @@ cache:
   # For example, if you run a pipeline with changes in your code,
   # but with no changes within third-party packages which your project is using,
   # then project restore will happen quickly as all required dependencies
-  # will already be there â€” unzipped from cache.
+  # will already be there — unzipped from cache.
 
   # 'pull-push' policy is the default cache policy, you do not have to specify it explicitly.
   policy: pull-push
