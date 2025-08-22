@@ -20,15 +20,14 @@ using Prometheus;
 
 var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
+// Add services to the container.
+builder.Services.AddHealthChecks();
 
-        builder.Services.AddHealthChecks();
+// Add memory cache
+builder.Services.AddMemoryCache();
 
-        // Add memory cache
-        builder.Services.AddMemoryCache();
-        
-        // Add HttpContextAccessor for IPCaptureHandler
-        builder.Services.AddHttpContextAccessor();
+// Add HttpContextAccessor for IPCaptureHandler
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +63,7 @@ if (redisConfiguration != null)
     redisConfiguration.ConnectTimeout = 10000;
     redisConfiguration.ConnectRetry = 10;
     redisConfiguration.AbortOnConnectFail = false;
-    
+
     // Cấu hình connection pool
     redisConfiguration.PoolSize = 50;
 }
@@ -86,29 +85,33 @@ LogManager
           {
                     new SentryLogging(new SentryEngineOptions
                     {
-                        Dsn = new Dsn(appSettings.SentryDsn)
+                        Dsn = !string.IsNullOrEmpty(appSettings.SentryDsn) ? new Dsn(appSettings.SentryDsn) : null,
+                        Environment = appSettings.Environment ?? "development",
+                        Release = builder.Configuration["Sentry:Release"]
                     })
           });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 
-app.UseRouting();
-
-// Thêm Redis health check middleware
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<RedisHealthMiddleware>();
 
-app.UseMiddleware<ExceptionMiddleware>();
-
+app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
-// Use the Prometheus middleware
+app.MapControllers();
+
+// Add Prometheus metrics
 app.UseMetricServer();
 app.UseHttpMetrics();
 
@@ -122,11 +125,6 @@ app.UseHealthChecks("/healthz", new HealthCheckOptions
 // Ocelot middleware phải được đặt sau routing và trước endpoints
 await app.UseOcelot();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapControllers(); // Map controllers
-});
-
-LogService.Info(string.Format("This is Gateway API {0} has been started at {1}", typeof(Program).FullName, DateTimeOffset.Now));
+LogService.Info($"This is Gateway API {typeof(Program).FullName} has been started at {DateTimeOffset.Now}");
 
 app.Run();

@@ -30,6 +30,9 @@ variables:
   # 3) A relative path to the source code from project repository root.
   # NOTE: Please edit this path so it matches the structure of your project!
   SOURCE_CODE_PATH: '*/*/'
+  # 4) Disable .NET CLI telemetry and first-time experience
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
 
 # ### Define global cache rule
 #
@@ -74,18 +77,35 @@ cache:
   # 'pull-push' policy is the default cache policy, you do not have to specify it explicitly.
   policy: pull-push
 
-# ### Restore project dependencies
+# ### Configure NuGet sources for Fanex packages
 #
-# NuGet packages by default are restored to '.nuget/packages' directory
-# in the user's home directory. That directory is out of scope of GitLab caching.
-#
-# To get around this, a custom path can be specified using the '--packages <PATH>' option
-# for 'dotnet restore' command. In this example, a temporary directory is created
-# in the root of project repository, so its content can be cached.
-#
-# Learn more about GitLab cache: https://docs.gitlab.com/ee/ci/caching/index.html
+# The Fanex.Logging packages are hosted on a private NuGet feed.
+# This script configures access to the nexdev feed.
 before_script:
-  - 'dotnet restore --packages $NUGET_PACKAGES_DIRECTORY'
+  - |
+    echo "Configuring NuGet package sources..."
+    
+    # Ensure NuGet.config exists with correct package sources
+    cat > NuGet.config << EOF
+    <?xml version="1.0" encoding="utf-8"?>
+    <configuration>
+      <packageSources>
+        <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+        <add key="nexdev" value="https://nuget.nexdev.net/api/v2/" />
+      </packageSources>
+      <packageSourceCredentials>
+        <!-- Add authentication if required -->
+        <!-- <nexdev>
+          <add key="Username" value="your_username" />
+          <add key="ClearTextPassword" value="your_password" />
+        </nexdev> -->
+      </packageSourceCredentials>
+    </configuration>
+    EOF
+    
+    echo "Package sources configured successfully"
+    echo "Restoring NuGet packages..."
+    dotnet restore --packages $NUGET_PACKAGES_DIRECTORY
 
 build:
   stage: build
