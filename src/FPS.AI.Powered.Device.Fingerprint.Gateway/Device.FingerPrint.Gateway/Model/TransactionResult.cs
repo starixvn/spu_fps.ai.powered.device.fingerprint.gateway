@@ -31,6 +31,11 @@ namespace Device.FingerPrint.Gateway.Model
 
         public static string GetMessage(string code)
         {
+            if (string.IsNullOrEmpty(code))
+            {
+                return "Unknown error code";
+            }
+            
             return MessageMap.TryGetValue(code, out var message) ? message : "Unknown error code";
         }
     }

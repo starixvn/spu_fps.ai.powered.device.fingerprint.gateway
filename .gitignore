@@ -38,3 +38,4 @@ msbuild.wrn
 /*.md
 /*.md
 /src/FPS.AI.Powered.Device.Fingerprint.Gateway/Device.FingerPrint.Gateway/README-Redis-Troubleshooting.md
+**/TestResults/
