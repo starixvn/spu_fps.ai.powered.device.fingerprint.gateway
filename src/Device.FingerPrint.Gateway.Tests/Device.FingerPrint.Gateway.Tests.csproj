@@ -23,11 +23,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj" />
+		<Using Include="Xunit" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Using Include="Xunit" />
+		<ProjectReference Include="..\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj" />
 	</ItemGroup>
 
 </Project>
