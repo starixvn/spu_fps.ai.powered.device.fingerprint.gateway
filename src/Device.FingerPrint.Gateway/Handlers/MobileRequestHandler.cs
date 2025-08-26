@@ -1,11 +1,11 @@
-using Device.FingerPrint.Gateway.Model;
-using Device.FingerPrint.Gateway.Services;
-using Fanex.Logging;
-using Newtonsoft.Json;
-using System.Text;
-
 namespace Device.FingerPrint.Gateway.Handlers
 {
+    using Device.FingerPrint.Gateway.Model;
+    using Device.FingerPrint.Gateway.Services;
+    using Fanex.Logging;
+    using Newtonsoft.Json;
+    using System.Text;
+
     public class MobileRequestHandler : DelegatingHandler
     {
         private readonly ISubscriberService subscriberService;

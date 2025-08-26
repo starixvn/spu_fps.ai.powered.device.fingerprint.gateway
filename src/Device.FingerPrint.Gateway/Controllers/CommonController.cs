@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Mvc;
-using Device.FingerPrint.Gateway.Model;
-
 namespace Device.FingerPrint.Gateway.Controllers
-{    
+{
+    using Device.FingerPrint.Gateway.Model;
+    using Microsoft.AspNetCore.Http.Features;
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiController]
     public class CommonController(IAppSettings appSettings) : ControllerBase
     {

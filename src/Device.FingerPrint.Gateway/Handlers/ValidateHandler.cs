@@ -1,13 +1,11 @@
-using Device.FingerPrint.Gateway.Model;
-using Device.FingerPrint.Gateway.Services;
-using Device.FingerPrint.Redis;
-using Fanex.Logging;
-using Microsoft.Extensions.Caching.Memory;
-using Newtonsoft.Json;
-using System.Text;
-
 namespace Device.FingerPrint.Gateway.Handlers
 {
+    using Device.FingerPrint.Gateway.Model;
+    using Device.FingerPrint.Gateway.Services;
+    using Fanex.Logging;
+    using Newtonsoft.Json;
+    using System.Text;
+
     public class ValidateHandler : DelegatingHandler
     {
         private readonly ISubscriberService subscriberService;

@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Device.FingerPrint.Gateway", "src\FPS.AI.Powered.Device.Fingerprint.Gateway\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj", "{36BEC187-7F8D-4E82-8BE3-AAFC5BFE4720}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Device.FingerPrint.Gateway", "src\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj", "{36BEC187-7F8D-4E82-8BE3-AAFC5BFE4720}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Device.FingerPrint.Gateway.Tests", "src\Device.FingerPrint.Gateway.Tests\Device.FingerPrint.Gateway.Tests.csproj", "{5B67140F-70C3-4231-BDB2-70FA40AB246B}"
 EndProject

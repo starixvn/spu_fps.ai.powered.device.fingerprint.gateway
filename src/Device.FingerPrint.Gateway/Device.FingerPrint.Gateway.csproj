@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <SonarQubeExclude>true</SonarQubeExclude>
@@ -31,6 +31,10 @@
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
     <PackageReference Include="System.Formats.Asn1" Version="9.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Remove="D:\Code\NewClone\fps.ai.powered.device.fingerprint.gateway\src\Device.FingerPrint.Gateway\sonar-project.properties" />
   </ItemGroup>
 
   <ItemGroup>
