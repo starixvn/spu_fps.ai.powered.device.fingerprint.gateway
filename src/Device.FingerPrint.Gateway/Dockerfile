@@ -1,25 +1,69 @@
-FROM hub.nexdev.net/base/dotnet/core/sdk:9.0-alpine AS builder
+# Multi-stage build for FPS AI-Powered Device Fingerprint Gateway
+# Stage 1: Build
+FROM hub.nexdev.net/base/dotnet/core/sdk:9.0-alpine AS build
 
 WORKDIR /src
 
-COPY ["./src/Device.FingerPrint.Gateway/Device.FingerPrint.Gateway.csproj", "Device.FingerPrint.Gateway/"]
+# Install curl for health checks (if needed)
+RUN apk add --no-cache curl
 
-WORKDIR "/src/Device.FingerPrint.Gateway"
+# Create non-root user for security
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup
 
+# Copy project files for dependency restoration
+COPY ["src/Device.FingerPrint.Gateway/Device.FingerPrint.Gateway.csproj", "Device.FingerPrint.Gateway/"]
+
+# Add custom NuGet source
 RUN dotnet nuget add source https://nuget.nexdev.net/api/v2
 
-RUN dotnet restore -v n
+# Restore dependencies
+WORKDIR "/src/Device.FingerPrint.Gateway"
+RUN dotnet restore "Device.FingerPrint.Gateway.csproj" -v n
 
-COPY ./src/Device.FingerPrint.Gateway .
+# Copy source code
+COPY ["src/Device.FingerPrint.Gateway/", "."]
 
-RUN dotnet publish -r linux-x64 --self-contained false -c Release -o /app
+# Build and publish the application
+RUN dotnet publish "Device.FingerPrint.Gateway.csproj" \
+    -c Release \
+    -o /app/publish \
+    --no-restore \
+    --verbosity normal
 
-FROM hub.nexdev.net/base/dotnet/core/aspnet:9.0-alpine AS base
+# Stage 2: Runtime
+FROM hub.nexdev.net/base/dotnet/core/aspnet:9.0-alpine AS runtime
 
 WORKDIR /app
 
-COPY --from=builder /app .
+# Install necessary packages for runtime
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    ca-certificates
 
+# Create non-root user for security
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -S appuser -u 1001 -G appgroup
+
+# Copy published application
+COPY --from=build /app/publish .
+
+# Set ownership to non-root user
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Environment variables
 ENV TZ="America/La_Paz"
 
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/healthz || exit 1
+
+# Entry point
 ENTRYPOINT ["dotnet", "Device.FingerPrint.Gateway.dll"]
