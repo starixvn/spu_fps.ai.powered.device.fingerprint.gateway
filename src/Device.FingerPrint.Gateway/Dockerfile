@@ -5,11 +5,10 @@ FROM hub.nexdev.net/base/dotnet/core/sdk:9.0-alpine AS build
 WORKDIR /src
 
 # Install curl for health checks (if needed)
-RUN apk add --no-cache curl
-
 # Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S appuser -u 1001 -G appgroup
+RUN apk add --no-cache curl \
+&& addgroup -g 1001 -S appgroup \
+&& adduser -S appuser -u 1001 -G appgroup
 
 # Copy project files for dependency restoration
 COPY ["src/Device.FingerPrint.Gateway/Device.FingerPrint.Gateway.csproj", "Device.FingerPrint.Gateway/"]
@@ -38,9 +37,9 @@ WORKDIR /app
 
 # Install necessary packages for runtime
 RUN apk add --no-cache \
+    ca-certificates \
     curl \
-    tzdata \
-    ca-certificates
+    tzdata
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S appgroup && \
