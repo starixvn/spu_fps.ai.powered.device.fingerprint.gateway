@@ -39,11 +39,9 @@ WORKDIR /app
 RUN apk add --no-cache \
     ca-certificates \
     curl \
-    tzdata
-
-# Create non-root user for security
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -S appuser -u 1001 -G appgroup
+    tzdata \
+&& addgroup -g 1001 -S appgroup \
+&& adduser -S appuser -u 1001 -G appgroup
 
 # Copy published application
 COPY --from=build /app/publish .
