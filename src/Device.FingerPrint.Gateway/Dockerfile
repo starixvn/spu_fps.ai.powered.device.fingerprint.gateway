@@ -56,11 +56,11 @@ USER appuser
 ENV TZ="America/La_Paz"
 
 # Expose port
-EXPOSE 8080
+EXPOSE 5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/healthz || exit 1
+    CMD curl -f http://localhost:5000/healthz || exit 1
 
 # Entry point
 ENTRYPOINT ["dotnet", "Device.FingerPrint.Gateway.dll"]
