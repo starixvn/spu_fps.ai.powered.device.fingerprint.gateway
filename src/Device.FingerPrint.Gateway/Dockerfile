@@ -57,6 +57,7 @@ ENV TZ="America/La_Paz"
 
 # Expose port
 EXPOSE 5000
+ENV ASPNETCORE_URLS=http://+:5000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
