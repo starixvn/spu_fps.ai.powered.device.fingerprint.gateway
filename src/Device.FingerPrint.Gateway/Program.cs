@@ -94,21 +94,18 @@ LogManager
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<RedisHealthMiddleware>();
 
-app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseRouting();
 app.MapControllers();
 
 // Add Prometheus metrics
