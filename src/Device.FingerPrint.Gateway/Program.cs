@@ -102,11 +102,15 @@ app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseMiddleware<RedisHealthMiddleware>();
 
+app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseRouting();
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers(); // Map controllers
+});
 
 // Add Prometheus metrics
 app.UseMetricServer();
