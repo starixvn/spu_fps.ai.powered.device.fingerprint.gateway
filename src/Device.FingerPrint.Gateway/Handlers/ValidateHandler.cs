@@ -1,20 +1,22 @@
+using Device.FingerPrint.Gateway.Models;
+using Device.FingerPrint.Gateway.Services;
+using Fanex.Logging;
+using Newtonsoft.Json;
+using System.Text;
+
 namespace Device.FingerPrint.Gateway.Handlers
 {
-    using Device.FingerPrint.Gateway.Model;
-    using Device.FingerPrint.Gateway.Services;
-    using Fanex.Logging;
-    using Newtonsoft.Json;
-    using System.Text;
-
     public class ValidateHandler : DelegatingHandler
     {
+        private readonly ILogger _logger;
         private readonly ISubscriberService subscriberService;
         private readonly IGatewayService gatewayService;
 
         private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "qctest5oct202019", "qatest05" };
 
-        public ValidateHandler(ISubscriberService subscriberService, IGatewayService gatewayService)
+        public ValidateHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService)
         {
+            _logger = logger;
             this.subscriberService = subscriberService;
             this.gatewayService = gatewayService;
         }
@@ -23,58 +25,107 @@ namespace Device.FingerPrint.Gateway.Handlers
         {
             try
             {
-                var isDisableDI = await gatewayService.IsDisableDIAsync();
-                if (isDisableDI)
+                if (await IsGatewayDisabledAsync())
                 {
-                    return new HttpResponseMessage
-                    {
-                        StatusCode = System.Net.HttpStatusCode.OK
-                    };
+                    return CreateOkResponse();
                 }
 
-                if (request != null && request.Content != null && !isDisableDI)
+                if (!IsValidRequest(request))
                 {
-                    var content = await request.Content.ReadAsStringAsync();
-
-                    if (!string.IsNullOrWhiteSpace(content))
-                    {
-                        var transactionRequest = JsonConvert.DeserializeObject<TransactionRequest>(content);
-
-                        if (transactionRequest != null && !string.IsNullOrWhiteSpace(transactionRequest?.Subscriber) && !string.IsNullOrWhiteSpace(transactionRequest.Account))
-                        {
-                            if (DebugAccounts.Contains(transactionRequest.Account.ToLower()))
-                            {
-                                _ = LogService.InfoAsync($"Gateway Debug for Account:{transactionRequest.Account}\n {JsonConvert.SerializeObject(transactionRequest)}");
-                            }
-
-                            if (await this.subscriberService.ValidateAsync(transactionRequest?.Subscriber))
-                            {
-                                transactionRequest.TransDate = DateTime.Now;
-                                request.Content = new StringContent(JsonConvert.SerializeObject(transactionRequest), Encoding.UTF8, "application/json");
-
-                                return await base.SendAsync(request, cancellationToken);
-                            }
-                            else
-                            {
-                                _ = LogService.InfoAsync($"Gateway Subscriber invalid:\n {JsonConvert.SerializeObject(transactionRequest)}");
-                            }
-                        }
-                        else
-                        {
-                            _ = LogService.InfoAsync($"Gateway TransactionRequest invalid:\n {JsonConvert.SerializeObject(transactionRequest)}");
-                        }
-                    }
-                    else
-                    {
-                        _ = LogService.InfoAsync($"Gateway cannot read request.Content:\n {JsonConvert.SerializeObject(request.Content)}");
-                    }
+                    return CreateBadRequestResponse();
                 }
+
+                var transactionRequest = await ParseAndValidateTransactionAsync(request);
+                if (transactionRequest == null)
+                {
+                    return CreateBadRequestResponse();
+                }
+
+                await LogDebugAccountIfNeededAsync(transactionRequest);
+
+                if (!await IsValidSubscriberAsync(transactionRequest.Subscriber))
+                {
+                    await _logger.InfoAsync($"Gateway Subscriber invalid:\n {JsonConvert.SerializeObject(transactionRequest)}");
+                    return CreateBadRequestResponse();
+                }
+
+                return await ForwardValidTransactionAsync(transactionRequest, request, cancellationToken);
             }
             catch (Exception ex)
             {
-                LogService.Error(ex.Message, ex);
+                await _logger.ErrorAsync(ex.Message, ex);
+                return CreateBadRequestResponse();
+            }
+        }
+
+        private async Task<bool> IsGatewayDisabledAsync()
+        {
+            return await gatewayService.IsDisableDIAsync();
+        }
+
+        private static bool IsValidRequest(HttpRequestMessage request)
+        {
+            return request?.Content != null;
+        }
+
+        private async Task<TransactionRequest?> ParseAndValidateTransactionAsync(HttpRequestMessage request)
+        {
+            var content = await request.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                await _logger.InfoAsync($"Gateway cannot read request.Content:\n {JsonConvert.SerializeObject(request.Content)}");
+                return null;
             }
 
+            var transactionRequest = JsonConvert.DeserializeObject<TransactionRequest>(content);
+
+            if (!IsValidTransactionRequest(transactionRequest))
+            {
+                await _logger.InfoAsync($"Gateway TransactionRequest invalid:\n {JsonConvert.SerializeObject(transactionRequest)}");
+                return null;
+            }
+
+            return transactionRequest;
+        }
+
+        private static bool IsValidTransactionRequest(TransactionRequest? transactionRequest)
+        {
+            return transactionRequest != null && 
+                   !string.IsNullOrWhiteSpace(transactionRequest.Subscriber) && 
+                   !string.IsNullOrWhiteSpace(transactionRequest.Account);
+        }
+
+        private async Task LogDebugAccountIfNeededAsync(TransactionRequest transactionRequest)
+        {
+            if (DebugAccounts.Contains(transactionRequest.Account.ToLower()))
+            {
+                await _logger.InfoAsync($"Gateway Debug for Account:{transactionRequest.Account}\n {JsonConvert.SerializeObject(transactionRequest)}");
+            }
+        }
+
+        private async Task<bool> IsValidSubscriberAsync(string subscriber)
+        {
+            return await subscriberService.ValidateAsync(subscriber);
+        }
+
+        private async Task<HttpResponseMessage> ForwardValidTransactionAsync(TransactionRequest transactionRequest, HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            transactionRequest.TransDate = DateTime.Now;
+            request.Content = new StringContent(JsonConvert.SerializeObject(transactionRequest), Encoding.UTF8, "application/json");
+            return await base.SendAsync(request, cancellationToken);
+        }
+
+        private static HttpResponseMessage CreateOkResponse()
+        {
+            return new HttpResponseMessage
+            {
+                StatusCode = System.Net.HttpStatusCode.OK
+            };
+        }
+
+        private static HttpResponseMessage CreateBadRequestResponse()
+        {
             return new HttpResponseMessage
             {
                 StatusCode = System.Net.HttpStatusCode.BadRequest

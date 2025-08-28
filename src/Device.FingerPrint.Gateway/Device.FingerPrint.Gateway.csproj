@@ -1,36 +1,26 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<Nullable>enable</Nullable>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<SonarQubeExclude>true</SonarQubeExclude>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>b7faf95e-21e4-4bb1-8113-ef37a20f453e</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..</DockerfileContext>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets" Version="2.3.0" />
-		<PackageReference Include="StackExchange.Redis" Version="2.7.17" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.6.2" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
-		<PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
-		<PackageReference Include="Fanex.Logging.Extensions" Version="1.0.6" />
-		<PackageReference Include="Fanex.Logging.Extensions.AspNetCore" Version="1.0.0" />
-		<PackageReference Include="Fanex.Logging.Sentry" Version="1.0.6" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Ocelot" Version="23.3.3" />
-		<PackageReference Include="Ocelot.Cache.CacheManager" Version="23.3.3" />
-		<PackageReference Include="prometheus-net" Version="8.2.1" />
-		<PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
-		<PackageReference Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
-		<PackageReference Include="StackExchange.Redis.Extensions.MsgPack" Version="10.2.0" />
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="9.17.0.82934" />
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" />
-		<PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
-		<PackageReference Include="System.Formats.Asn1" Version="9.0.8" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fanex.Logging.Extensions" Version="2.0.2.1" />
+    <PackageReference Include="Fanex.Logging.Extensions.AspNetCore" Version="1.1.0" />
+    <PackageReference Include="Fanex.Logging.Sentry" Version="5.0.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+    <PackageReference Include="Ocelot" Version="24.0.1" />
+    <PackageReference Include="Ocelot.Cache.CacheManager" Version="24.0.0" />
+    <PackageReference Include="prometheus-net" Version="8.2.1" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
+    <PackageReference Include="StackExchange.Redis.Extensions.MsgPack" Version="11.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+  </ItemGroup>
 
 </Project>

@@ -1,7 +1,5 @@
-using Xunit;
-using NSubstitute;
-using Device.FingerPrint.Gateway;
 using Microsoft.Extensions.Configuration;
+using NSubstitute;
 
 namespace Device.FingerPrint.Gateway.Tests.Configuration
 {
@@ -14,7 +12,6 @@ namespace Device.FingerPrint.Gateway.Tests.Configuration
             configuration["IsUM"].Returns("false");
             configuration["GetSubscriberUrl"].Returns("http://test.com");
             configuration["Sentry:Dsn"].Returns("http://test-dsn.com");
-            configuration["Logstash:Url"].Returns("http://logstash.com");
             return configuration;
         }
 
@@ -112,22 +109,6 @@ namespace Device.FingerPrint.Gateway.Tests.Configuration
         }
 
         [Fact]
-        public void LogstashUrl_ShouldReturnValue_WhenConfigured()
-        {
-            // Arrange
-            var configuration = CreateBasicConfiguration();
-            configuration["Logstash:Url"].Returns("http://logstash-service.com");
-            
-            var appSettings = new AppSettings(configuration);
-
-            // Act
-            var logstashUrl = appSettings.LogstashUrl;
-
-            // Assert
-            Assert.Equal("http://logstash-service.com", logstashUrl);
-        }
-
-        [Fact]
         public void GetValue_ShouldReturnConfigurationValue_WhenKeyExists()
         {
             // Arrange
@@ -152,11 +133,8 @@ namespace Device.FingerPrint.Gateway.Tests.Configuration
             
             var appSettings = new AppSettings(configuration);
 
-            // Act
-            var value = appSettings.GetValue<string>("NonExistentKey");
-
-            // Assert
-            Assert.Equal("", value);
+            // Act & Assert
+            Assert.Throws<InvalidOperationException>(() => appSettings.GetValue<string>("NonExistentKey"));
         }
     }
 }

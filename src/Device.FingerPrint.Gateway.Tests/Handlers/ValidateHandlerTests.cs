@@ -1,15 +1,10 @@
-using Xunit;
 using NSubstitute;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Device.FingerPrint.Gateway.Handlers;
 using Device.FingerPrint.Gateway.Services;
-using Device.FingerPrint.Gateway.Model;
+using Device.FingerPrint.Gateway.Models;
 using Newtonsoft.Json;
 using System.Text;
 using System.Reflection;
-using Fanex.Logging;
 
 namespace Device.FingerPrint.Gateway.Tests.Handlers
 {
@@ -20,7 +15,6 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
             // Setup minimal logging to prevent NotImplementedException
             try
             {
-                LogManager.SetDefaultLogCategory("Test").Use(new List<ILogEngine>());
             }
             catch
             {

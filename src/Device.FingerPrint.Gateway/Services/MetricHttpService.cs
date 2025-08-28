@@ -1,12 +1,9 @@
-﻿namespace Device.FingerPrint.Core.Services
-{
-    using System;
-    using System.Net.Http.Headers;
-    using System.Net.Http;
-    using System.Text;
-    using Prometheus;
-    using Device.FingerPrint.Core.Model;
+﻿using Prometheus;
+using System.Net.Http.Headers;
+using System.Text;
 
+namespace Device.FingerPrint.Gateway.Services
+{
     public static class MetricHttpService
     {
         public static void PublicDataToGateway(GatewayInfo gatewayInfo)

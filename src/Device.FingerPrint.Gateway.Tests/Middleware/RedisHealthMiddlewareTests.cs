@@ -1,12 +1,9 @@
-using Xunit;
 using NSubstitute;
-using Device.FingerPrint.Gateway.Middleware;
-using Device.FingerPrint.Redis;
+using Device.FingerPrint.Gateway.Middlewares;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
-using System.IO;
 using System.Net;
+using Device.FingerPrint.Gateway.Services;
 
 namespace Device.FingerPrint.Gateway.Tests.Middleware
 {

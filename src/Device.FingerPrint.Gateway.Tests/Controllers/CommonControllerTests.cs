@@ -1,7 +1,6 @@
-using Xunit;
 using NSubstitute;
 using Device.FingerPrint.Gateway.Controllers;
-using Device.FingerPrint.Gateway.Model;
+using Device.FingerPrint.Gateway.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -10,21 +9,28 @@ namespace Device.FingerPrint.Gateway.Tests.Controllers
 {
     public class CommonControllerTests
     {
+        private readonly IAppSettings mockAppSettings;
+        private readonly IHttpConnectionFeature mockHttpConnectionFeature;
+        private CommonController controller;
+
+        public CommonControllerTests()
+        {
+            mockAppSettings = Substitute.For<IAppSettings>();
+            mockAppSettings.Environment.Returns("TEST");
+
+            mockHttpConnectionFeature = Substitute.For<IHttpConnectionFeature>();
+            mockHttpConnectionFeature.LocalIpAddress.Returns(System.Net.IPAddress.Loopback);
+
+            controller = new CommonController(mockAppSettings);
+        }
+
         [Fact]
         public void Index_Returns_WhoamiModel()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            appSettings.Environment.Returns("TEST");
-            
-            var controller = new CommonController(appSettings);
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
-            
-            // Mock the IHttpConnectionFeature
-            var connectionFeature = Substitute.For<IHttpConnectionFeature>();
-            connectionFeature.LocalIpAddress.Returns(System.Net.IPAddress.Loopback);
-            controller.ControllerContext.HttpContext.Features.Set(connectionFeature);
+            controller.ControllerContext.HttpContext.Features.Set(mockHttpConnectionFeature);
 
             // Act
             var result = controller.Index();
@@ -38,17 +44,9 @@ namespace Device.FingerPrint.Gateway.Tests.Controllers
         public void Index_Sets_ServerName_And_ServerTime()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            appSettings.Environment.Returns("TEST");
-            
-            var controller = new CommonController(appSettings);
             controller.ControllerContext = new ControllerContext();
             controller.ControllerContext.HttpContext = new DefaultHttpContext();
-            
-            // Mock the IHttpConnectionFeature
-            var connectionFeature = Substitute.For<IHttpConnectionFeature>();
-            connectionFeature.LocalIpAddress.Returns(System.Net.IPAddress.Loopback);
-            controller.ControllerContext.HttpContext.Features.Set(connectionFeature);
+            controller.ControllerContext.HttpContext.Features.Set(mockHttpConnectionFeature);
 
             // Act
             var result = controller.Index();
@@ -56,19 +54,6 @@ namespace Device.FingerPrint.Gateway.Tests.Controllers
             // Assert
             Assert.NotNull(result.ServerName);
             Assert.True(result.ServerTime > DateTime.MinValue);
-        }
-
-        [Fact]
-        public void CommonController_ShouldBeCreated_WithValidDependencies()
-        {
-            // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-
-            // Act
-            var controller = new CommonController(appSettings);
-
-            // Assert
-            Assert.NotNull(controller);
         }
     }
 }

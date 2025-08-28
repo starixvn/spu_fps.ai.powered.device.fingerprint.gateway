@@ -1,10 +1,5 @@
-using Xunit;
 using NSubstitute;
-using Device.FingerPrint.Gateway.Middleware;
-using Fanex.Logging;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
-using System.IO;
 
 namespace Device.FingerPrint.Gateway.Tests.Middleware
 {

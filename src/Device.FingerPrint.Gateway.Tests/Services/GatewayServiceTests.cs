@@ -1,9 +1,6 @@
-using Xunit;
 using NSubstitute;
 using Device.FingerPrint.Gateway.Services;
-using Device.FingerPrint.Redis;
 using Microsoft.Extensions.Caching.Memory;
-using System.Threading.Tasks;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {

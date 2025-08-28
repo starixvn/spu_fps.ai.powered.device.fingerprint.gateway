@@ -1,13 +1,19 @@
+﻿using Device.FingerPrint.Gateway.Models;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Device.FingerPrint.Gateway.Controllers
 {
-    using Device.FingerPrint.Gateway.Model;
-    using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.AspNetCore.Mvc;
-
+    [Route("")]
     [ApiController]
-    public class CommonController(IAppSettings appSettings) : ControllerBase
+    public class CommonController : ControllerBase
     {
-        private readonly IAppSettings appSettings = appSettings;
+        private readonly IAppSettings appSettings;
+
+        public CommonController(IAppSettings appSettings)
+        {
+            this.appSettings = appSettings;
+        }
 
         [HttpGet("whoami")]
         public WhoamiModel Index()
@@ -19,8 +25,8 @@ namespace Device.FingerPrint.Gateway.Controllers
             {
                 Environment = appSettings.Environment,
                 ServerName = Environment.MachineName,
-                ServerTime = DateTime.Now,
-                LocalIP = localIpAddress.ToString(),
+                ServerTime = DateTimeOffset.Now.DateTime,
+                LocalIP = localIpAddress?.ToString() ?? string.Empty,
                 ClientIP = GetHeaderIP("X-Remote-IP"),
                 FakeIP = GetFakeIp(),
                 RealIP = GetRealIp(),
@@ -28,7 +34,6 @@ namespace Device.FingerPrint.Gateway.Controllers
                 ActualIP = GetHeaderIP("X-Actual-IP")
             };
         }
-
 
         private string GetFakeIp()
         {

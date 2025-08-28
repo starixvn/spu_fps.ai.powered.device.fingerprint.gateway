@@ -1,9 +1,6 @@
-using Xunit;
 using NSubstitute;
 using Device.FingerPrint.Gateway.Services;
-using Device.FingerPrint.Gateway.Model;
-using Device.FingerPrint.Redis;
-using System.Threading.Tasks;
+using Device.FingerPrint.Gateway.Models;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {

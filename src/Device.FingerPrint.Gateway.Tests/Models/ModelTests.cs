@@ -1,6 +1,3 @@
-using Xunit;
-using Device.FingerPrint.Gateway.Model;
-
 namespace Device.FingerPrint.Gateway.Tests.Models
 {
     public class TransactionResultTests

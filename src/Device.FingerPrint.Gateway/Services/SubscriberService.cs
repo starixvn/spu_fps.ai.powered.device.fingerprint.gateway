@@ -1,10 +1,9 @@
+﻿using Device.FingerPrint.Gateway.Models;
+using Fanex.Logging;
+using System.Text.Json;
+
 namespace Device.FingerPrint.Gateway.Services
 {
-    using Device.FingerPrint.Gateway.Model;
-    using Device.FingerPrint.Redis;
-    using Fanex.Logging;
-    using System.Text.Json;
-
     public interface ISubscriberService
     {
         Task<bool> ValidateAsync(string subscriber);
@@ -49,13 +48,13 @@ namespace Device.FingerPrint.Gateway.Services
 
         private async Task<SubscriberModel> GetSubscriberInfo(string subName)
         {
-            if(!string.IsNullOrWhiteSpace(subName))
+            if (!string.IsNullOrWhiteSpace(subName))
             {
                 var cacheKey = $"GatewayAPI:{subName}";
 
                 var subData = await GetSubscriberInfoByCache(cacheKey, subName);
 
-                if(subData != null)
+                if (subData != null)
                 {
                     return subData;
                 }
@@ -63,19 +62,19 @@ namespace Device.FingerPrint.Gateway.Services
                 {
                     subData = await GetDataSubscriberAsync(subName);
 
-                    if(subData != null && subData.SubscriberId != 0)
+                    if (subData != null && subData.SubscriberId != 0)
                     {
                         _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, DateTimeOffset.UtcNow.AddMinutes(120));
 
                         return subData;
-                    }                    
+                    }
                 }
             }
 
             return new SubscriberModel();
         }
 
-        private async Task<SubscriberModel> GetSubscriberInfoByCache(string cacheKey, string subName)
+        private async Task<SubscriberModel?> GetSubscriberInfoByCache(string cacheKey, string subName)
         {
             try
             {
@@ -93,7 +92,8 @@ namespace Device.FingerPrint.Gateway.Services
 
             if (subData != null && subData.SubscriberId != 0)
             {
-                _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, DateTimeOffset.UtcNow.AddMinutes(120));
+                var expiredAt = DateTimeOffset.UtcNow.AddMinutes(120);
+                _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, expiredAt);
 
                 return subData;
             }

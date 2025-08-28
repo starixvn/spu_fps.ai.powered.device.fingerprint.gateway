@@ -1,6 +1,0 @@
-@Device.FingerPrint.Gateway_HostAddress = http://localhost:5282
-
-GET {{Device.FingerPrint.Gateway_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
