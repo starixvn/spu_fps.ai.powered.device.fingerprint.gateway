@@ -88,7 +88,7 @@ LogManager
                         Dsn = !string.IsNullOrEmpty(appSettings.SentryDsn) ? new Dsn(appSettings.SentryDsn) : null,
                         Environment = appSettings.Environment ?? "development",
                         Release = builder.Configuration["Sentry:Release"]
-                    })
+                    }),
           });
 
 var app = builder.Build();
