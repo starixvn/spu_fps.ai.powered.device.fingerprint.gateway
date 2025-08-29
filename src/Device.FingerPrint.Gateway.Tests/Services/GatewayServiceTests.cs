@@ -6,13 +6,19 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 {
     public class GatewayServiceTests
     {
+        private readonly IRedisService redisService;
+        private readonly IMemoryCache memoryCache;
+
+        public GatewayServiceTests()
+        {
+            redisService = Substitute.For<IRedisService>();
+            memoryCache = Substitute.For<IMemoryCache>();
+        }
+
         [Fact]
         public async Task IsDisableDIAsync_ReturnsFalse_WhenRedisReturnsNull()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             redisService.GetAsync<string>(Arg.Any<string>()).Returns(Task.FromResult<string>(null));
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>()).Returns(false);
             
@@ -29,9 +35,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task IsDisableDIAsync_ReturnsTrue_WhenRedisReturnsTrue()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             redisService.GetAsync<string>(Arg.Any<string>()).Returns(Task.FromResult("true"));
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>()).Returns(false);
             
@@ -48,9 +51,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task IsDisableDIAsync_ReturnsFalse_WhenRedisReturnsFalse()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             redisService.GetAsync<string>(Arg.Any<string>()).Returns(Task.FromResult("false"));
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>()).Returns(false);
             
@@ -67,9 +67,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task IsDisableDIAsync_ReturnsCachedValue_WhenCacheHit()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>())
                 .Returns(x => {
                     x[1] = true; // Set the out parameter
@@ -90,9 +87,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task IsDisableDIAsync_ReturnsFalse_WhenRedisThrowsException()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             redisService.GetAsync<string>(Arg.Any<string>()).Returns(Task.FromException<string>(new Exception("Redis error")));
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>()).Returns(false);
             
@@ -109,9 +103,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task IsDisableDIAsync_IsCaseInsensitive_WhenRedisReturnsTrue()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
-            
             redisService.GetAsync<string>(Arg.Any<string>()).Returns(Task.FromResult("TRUE"));
             memoryCache.TryGetValue(Arg.Any<string>(), out Arg.Any<object>()).Returns(false);
             
@@ -128,8 +119,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public void GatewayService_ShouldBeCreated_WithValidDependencies()
         {
             // Arrange
-            var redisService = Substitute.For<IRedisService>();
-            var memoryCache = Substitute.For<IMemoryCache>();
 
             // Act
             var gatewayService = new GatewayService(redisService, memoryCache);

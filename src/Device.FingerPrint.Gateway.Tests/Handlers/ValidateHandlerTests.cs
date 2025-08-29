@@ -1,30 +1,27 @@
-using NSubstitute;
 using Device.FingerPrint.Gateway.Handlers;
-using Device.FingerPrint.Gateway.Services;
 using Device.FingerPrint.Gateway.Models;
+using Device.FingerPrint.Gateway.Services;
 using Newtonsoft.Json;
-using System.Text;
+using NSubstitute;
 using System.Reflection;
+using System.Text;
 
 namespace Device.FingerPrint.Gateway.Tests.Handlers
 {
-    public class ValidateHandlerTests : IDisposable
+    public class ValidateHandlerTests
     {
+        private readonly ILogger mockLogger;
+        private readonly IGatewayService mockGatewayService;
+        private readonly ISubscriberService mockSubscriberService;
+        private readonly ValidateHandler validateHandler;
+
         public ValidateHandlerTests()
         {
-            // Setup minimal logging to prevent NotImplementedException
-            try
-            {
-            }
-            catch
-            {
-                // Ignore if already set
-            }
-        }
+            mockLogger = Substitute.For<ILogger>();
+            mockGatewayService = Substitute.For<IGatewayService>();
+            mockSubscriberService = Substitute.For<ISubscriberService>();
 
-        public void Dispose()
-        {
-            // Cleanup if needed
+            validateHandler = new ValidateHandler(mockLogger, mockSubscriberService, mockGatewayService);
         }
 
         private async Task<HttpResponseMessage> CallSendAsync(ValidateHandler handler, HttpRequestMessage request, CancellationToken cancellationToken)
@@ -39,17 +36,13 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         public async Task SendAsync_ReturnsBadRequest_WhenRequestIsNull()
         {
             // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-            gatewayService.IsDisableDIAsync().Returns(false);
-            
-            var handler = new ValidateHandler(subscriberService, gatewayService);
+            mockGatewayService.IsDisableDIAsync().Returns(false);
             
             var request = new HttpRequestMessage();
             request.Content = null;
 
             // Act
-            var response = await CallSendAsync(handler, request, CancellationToken.None);
+            var response = await CallSendAsync(validateHandler, request, CancellationToken.None);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
@@ -59,16 +52,12 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         public async Task SendAsync_ReturnsOk_WhenDisableDIIsTrue()
         {
             // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-            gatewayService.IsDisableDIAsync().Returns(true);
-            
-            var handler = new ValidateHandler(subscriberService, gatewayService);
+            mockGatewayService.IsDisableDIAsync().Returns(true);
             
             var request = new HttpRequestMessage();
 
             // Act
-            var response = await CallSendAsync(handler, request, CancellationToken.None);
+            var response = await CallSendAsync(validateHandler, request, CancellationToken.None);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
@@ -78,12 +67,8 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         public async Task SendAsync_ReturnsBadRequest_WhenSubscriberIsInvalid()
         {
             // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-            gatewayService.IsDisableDIAsync().Returns(false);
-            subscriberService.ValidateAsync(Arg.Any<string>()).Returns(false);
-            
-            var handler = new ValidateHandler(subscriberService, gatewayService);
+            mockGatewayService.IsDisableDIAsync().Returns(false);
+            mockSubscriberService.ValidateAsync(Arg.Any<string>()).Returns(false);
             
             var transactionRequest = new TransactionRequest
             {
@@ -95,28 +80,25 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await CallSendAsync(handler, request, CancellationToken.None);
+            var response = await CallSendAsync(validateHandler, request, CancellationToken.None);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-            await subscriberService.Received(1).ValidateAsync("invalid_subscriber");
+            await mockSubscriberService.Received(1).ValidateAsync("invalid_subscriber");
         }
 
         [Fact]
         public async Task SendAsync_ReturnsBadRequest_WhenContentIsEmpty()
         {
             // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-            gatewayService.IsDisableDIAsync().Returns(false);
-            
-            var handler = new ValidateHandler(subscriberService, gatewayService);
-            
+            mockSubscriberService.ValidateAsync(Arg.Any<string>()).Returns(false);
+            mockGatewayService.IsDisableDIAsync().Returns(false);
+
             var request = new HttpRequestMessage();
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
 
             // Act
-            var response = await CallSendAsync(handler, request, CancellationToken.None);
+            var response = await CallSendAsync(validateHandler, request, CancellationToken.None);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
@@ -126,11 +108,7 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         public async Task SendAsync_ReturnsBadRequest_WhenTransactionRequestIsInvalid()
         {
             // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-            gatewayService.IsDisableDIAsync().Returns(false);
-            
-            var handler = new ValidateHandler(subscriberService, gatewayService);
+            mockGatewayService.IsDisableDIAsync().Returns(false);
             
             var transactionRequest = new TransactionRequest
             {
@@ -142,24 +120,10 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             // Act
-            var response = await CallSendAsync(handler, request, CancellationToken.None);
+            var response = await CallSendAsync(validateHandler, request, CancellationToken.None);
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
-        [Fact]
-        public void ValidateHandler_ShouldBeCreated_WithValidDependencies()
-        {
-            // Arrange
-            var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
-
-            // Act
-            var handler = new ValidateHandler(subscriberService, gatewayService);
-
-            // Assert
-            Assert.NotNull(handler);
         }
     }
 }

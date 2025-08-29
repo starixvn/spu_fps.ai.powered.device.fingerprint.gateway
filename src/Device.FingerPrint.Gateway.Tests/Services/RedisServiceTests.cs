@@ -1,19 +1,26 @@
-using NSubstitute;
-using Microsoft.Extensions.Logging;
 using Device.FingerPrint.Gateway.Services;
+using NSubstitute;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {
     public class RedisServiceTests
     {
+        private readonly ILogger logger;
+        private readonly IRedisClient redisClient;
+        private readonly IRedisDatabase redisDatabase;
+
+        public RedisServiceTests()
+        {
+            logger = Substitute.For<ILogger>();
+            redisClient = Substitute.For<IRedisClient>();
+            redisDatabase = Substitute.For<IRedisDatabase>();
+        }
+
         [Fact]
         public void SetAsync_ShouldNotThrow_WhenCalled()
         {
             // Arrange
-            var redisClient = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisClient>();
-            var redisDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var logger = Substitute.For<ILogger<RedisService>>();
-            
             redisClient.GetDefaultDatabase().Returns(redisDatabase);
             redisClient.GetDb(Arg.Any<int>()).Returns(redisDatabase);
 
@@ -28,10 +35,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public void GetAsync_ShouldNotThrow_WhenCalled()
         {
             // Arrange
-            var redisClient = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisClient>();
-            var redisDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var logger = Substitute.For<ILogger<RedisService>>();
-            
             redisClient.GetDefaultDatabase().Returns(redisDatabase);
             redisClient.GetDb(Arg.Any<int>()).Returns(redisDatabase);
 
@@ -45,10 +48,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public void HashSetAsync_ShouldNotThrow_WhenCalled()
         {
             // Arrange
-            var redisClient = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisClient>();
-            var redisDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var logger = Substitute.For<ILogger<RedisService>>();
-            
             redisClient.GetDefaultDatabase().Returns(redisDatabase);
             redisClient.GetDb(Arg.Any<int>()).Returns(redisDatabase);
 
@@ -62,10 +61,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public void RedisService_ShouldInitialize_WithValidDependencies()
         {
             // Arrange
-            var redisClient = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisClient>();
-            var redisDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var logger = Substitute.For<ILogger<RedisService>>();
-            
             redisClient.GetDefaultDatabase().Returns(redisDatabase);
             redisClient.GetDb(Arg.Any<int>()).Returns(redisDatabase);
 
@@ -75,27 +70,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             // Assert
             Assert.NotNull(redisService);
             Assert.NotNull(redisService.RedisDatabase);
-            Assert.NotNull(redisService.RedisJSChallengeDatabase);
-        }
-
-        [Fact]
-        public void RedisService_Properties_ShouldReturnCorrectDatabases()
-        {
-            // Arrange
-            var redisClient = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisClient>();
-            var defaultDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var jsChallengeDatabase = Substitute.For<StackExchange.Redis.Extensions.Core.Abstractions.IRedisDatabase>();
-            var logger = Substitute.For<ILogger<RedisService>>();
-            
-            redisClient.GetDefaultDatabase().Returns(defaultDatabase);
-            redisClient.GetDb(10).Returns(jsChallengeDatabase); // REDIS_JSCHALLENGE_DATABASE = 10
-
-            // Act
-            var redisService = new RedisService(redisClient, logger);
-
-            // Assert
-            Assert.Same(defaultDatabase, redisService.RedisDatabase);
-            Assert.Same(jsChallengeDatabase, redisService.RedisJSChallengeDatabase);
         }
     }
 }

@@ -8,7 +8,7 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 
-public class IPCaptureHandlerTests : IDisposable
+public class IPCaptureHandlerTests
 {
     private readonly ILogger mockLogger;
     private readonly IHttpContextAccessor mockHttpContextAccessor;
@@ -19,11 +19,6 @@ public class IPCaptureHandlerTests : IDisposable
         mockLogger = Substitute.For<ILogger>();
         mockHttpContextAccessor = Substitute.For<IHttpContextAccessor>();
         _ipCaptureHandler = new IPCaptureHandler(mockLogger, mockHttpContextAccessor);
-    }
-
-    public void Dispose()
-    {
-        // Cleanup if needed
     }
 
     private async Task<HttpResponseMessage> CallSendAsync(IPCaptureHandler handler, HttpRequestMessage request, CancellationToken cancellationToken)

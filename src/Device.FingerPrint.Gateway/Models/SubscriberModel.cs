@@ -4,6 +4,6 @@
     {
         public int SubscriberId { get; set; }
 
-        public string SubscriberName { get; set; } = string.Empty;
+        public string? SubscriberName { get; set; }
     }
 }

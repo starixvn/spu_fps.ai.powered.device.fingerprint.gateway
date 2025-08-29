@@ -1,16 +1,23 @@
 using NSubstitute;
 using Microsoft.AspNetCore.Http;
+using Device.FingerPrint.Gateway.Middlewares;
 
 namespace Device.FingerPrint.Gateway.Tests.Middleware
 {
     public class ExceptionMiddlewareTests
     {
+        private readonly ILogger logger;
+
+        public ExceptionMiddlewareTests()
+        {
+            logger = Substitute.For<ILogger>();
+        }
+
         [Fact]
         public async Task InvokeAsync_ShouldCallNext_WhenNoExceptionThrown()
         {
             // Arrange
             var next = Substitute.For<RequestDelegate>();
-            var logger = Substitute.For<ILogger>();
             var context = new DefaultHttpContext();
             
             var middleware = new ExceptionMiddleware(next, logger);
@@ -27,7 +34,6 @@ namespace Device.FingerPrint.Gateway.Tests.Middleware
         {
             // Arrange
             var next = Substitute.For<RequestDelegate>();
-            var logger = Substitute.For<ILogger>();
             var context = new DefaultHttpContext();
             context.Response.Body = new MemoryStream();
             
@@ -48,7 +54,6 @@ namespace Device.FingerPrint.Gateway.Tests.Middleware
         {
             // Arrange
             var next = Substitute.For<RequestDelegate>();
-            var logger = Substitute.For<ILogger>();
             var context = new DefaultHttpContext();
             context.Response.Body = new MemoryStream();
             
@@ -70,7 +75,6 @@ namespace Device.FingerPrint.Gateway.Tests.Middleware
         {
             // Arrange
             var next = Substitute.For<RequestDelegate>();
-            var logger = Substitute.For<ILogger>();
             var context = new DefaultHttpContext();
             context.Response.Body = new MemoryStream();
             
@@ -91,7 +95,6 @@ namespace Device.FingerPrint.Gateway.Tests.Middleware
         {
             // Arrange
             var next = Substitute.For<RequestDelegate>();
-            var logger = Substitute.For<ILogger>();
 
             // Act
             var middleware = new ExceptionMiddleware(next, logger);

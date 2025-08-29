@@ -11,11 +11,13 @@ namespace Device.FingerPrint.Gateway.Services
 
     public class SubscriberService : ISubscriberService
     {
+        private readonly ILogger logger;
         private readonly IAppSettings appSettings;
         private readonly IRedisService redisService;
 
-        public SubscriberService(IAppSettings appSettings, IRedisService redisService)
+        public SubscriberService(ILogger logger, IAppSettings appSettings, IRedisService redisService)
         {
+            this.logger = logger;
             this.appSettings = appSettings;
             this.redisService = redisService;
         }
@@ -127,7 +129,7 @@ namespace Device.FingerPrint.Gateway.Services
             }
             catch
             {
-                LogService.Error($"Cannot getSubscriber {subName} from {appSettings.GetSubscriberInfo}");
+                logger.Error($"Cannot getSubscriber {subName} from {appSettings.GetSubscriberInfo}");
                 return new SubscriberModel();
             }
         }
