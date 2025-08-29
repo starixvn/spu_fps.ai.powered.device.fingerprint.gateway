@@ -7,6 +7,7 @@ using Fanex.Logging.Sentry;
 using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Values;
 using Prometheus;
 using StackExchange.Redis.Extensions.Core;
 using StackExchange.Redis.Extensions.Core.Abstractions;
@@ -49,6 +50,15 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(opt =>
+{
+    opt.AddDefaultPolicy(builder => builder
+        .WithOrigins("*")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
+});
+
 builder.Services.AddSwaggerGen();
 
 builder.Services
@@ -90,6 +100,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 
