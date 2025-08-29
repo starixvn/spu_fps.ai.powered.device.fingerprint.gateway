@@ -13,7 +13,7 @@ using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Core.Implementations;
 using StackExchange.Redis.Extensions.MsgPack;
-[ExcludeFromCodeCoverage]
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
