@@ -102,7 +102,9 @@ app.UseAuthorization();
 
 app.UseCors();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+    endpoints.MapControllers()
+);
 
 // Add Prometheus metrics
 app.UseMetricServer();

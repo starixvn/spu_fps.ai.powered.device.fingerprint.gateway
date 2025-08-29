@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Device.FingerPrint.Gateway.Controllers
 {
-    [Route("")]
     [ApiController]
     public class CommonController : ControllerBase
     {
