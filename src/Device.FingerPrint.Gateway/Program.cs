@@ -52,7 +52,7 @@ builder.Services.AddControllers();
 builder.Services.AddCors(opt =>
 {
     opt.AddDefaultPolicy(builder => builder
-        .WithOrigins("*")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
         .AllowAnyMethod()
         .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
