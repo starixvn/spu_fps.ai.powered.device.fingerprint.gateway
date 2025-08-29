@@ -110,21 +110,15 @@ namespace Device.FingerPrint.Gateway.Services
                 httpClient.Timeout = TimeSpan.FromMinutes(1);
                 var url = $"{appSettings.GetSubscriberInfo}?subscriberName={subName}";
 
-                var result = await httpClient.GetAsync(url)
-                    .ContinueWith((responseTask) =>
-                    {
-                        var response = responseTask.Result;
-                        var jsonString = response.Content.ReadAsStringAsync();
+                var response = await httpClient.GetAsync(url);
+                var jsonString = await response.Content.ReadAsStringAsync();
 
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
 
-                        return JsonSerializer.Deserialize<SubscriberModel>(jsonString.Result, options);
-                    });
-
-                return result ?? new SubscriberModel();
+                return JsonSerializer.Deserialize<SubscriberModel>(jsonString, options) ?? new SubscriberModel();
             }
             catch
             {

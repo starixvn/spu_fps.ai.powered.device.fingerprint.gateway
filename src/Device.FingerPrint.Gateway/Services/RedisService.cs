@@ -71,7 +71,7 @@ namespace Device.FingerPrint.Gateway.Services
                 }
             }
 
-            throw new InvalidOperationException($"Redis operation {operationName} failed after {MAX_RETRY_ATTEMPTS} attempts");
+            throw new InvalidOperationException($"Redis {operationName} failed after {MAX_RETRY_ATTEMPTS} attempts");
         }
 
         public async Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt)

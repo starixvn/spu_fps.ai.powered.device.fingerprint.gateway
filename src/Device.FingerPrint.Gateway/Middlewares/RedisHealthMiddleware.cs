@@ -49,7 +49,7 @@ namespace Device.FingerPrint.Gateway.Middlewares
         {
             try
             {
-                return await _redisService.SetAsync("health_check", DateTime.UtcNow.ToString());
+                return await _redisService.SetAsync("health_check", DateTimeOffset.UtcNow.ToString());
             }
             catch (Exception ex)
             {

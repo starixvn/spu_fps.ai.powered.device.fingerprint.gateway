@@ -118,7 +118,7 @@ namespace Device.FingerPrint.Gateway.Handlers
 
         private async Task ProcessDebugAndExceptionLoggingAsync(MobileTransactionModel transaction)
         {
-            if (DebugAccounts.Contains(transaction.Account.ToLower().Trim()))
+            if (DebugAccounts.Contains(transaction.Account.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim()))
             {
                 await logger.InfoAsync($"Gateway Debug for Account:{transaction.Account}\n {JsonConvert.SerializeObject(transaction)}");
             }
@@ -136,7 +136,7 @@ namespace Device.FingerPrint.Gateway.Handlers
 
         private async Task<HttpResponseMessage> ForwardValidTransactionAsync(MobileTransactionModel transaction, HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            transaction.TransDate = DateTime.Now;
+            transaction.TransDate = DateTimeOffset.Now.DateTime;
             request.Content = new StringContent(JsonConvert.SerializeObject(transaction), Encoding.UTF8, "application/json");
             return await base.SendAsync(request, cancellationToken);
         }
@@ -154,15 +154,6 @@ namespace Device.FingerPrint.Gateway.Handlers
             return new HttpResponseMessage
             {
                 StatusCode = System.Net.HttpStatusCode.BadRequest
-            };
-        }
-
-        private static HttpResponseMessage CreateBadRequestResponse(string message)
-        {
-            return new HttpResponseMessage
-            {
-                StatusCode = System.Net.HttpStatusCode.BadRequest,
-                Content = new StringContent(message)
             };
         }
     }

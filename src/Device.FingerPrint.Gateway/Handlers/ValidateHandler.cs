@@ -97,7 +97,7 @@ namespace Device.FingerPrint.Gateway.Handlers
 
         private async Task LogDebugAccountIfNeededAsync(TransactionRequest transactionRequest)
         {
-            if (DebugAccounts.Contains(transactionRequest.Account.ToLower()))
+            if (DebugAccounts.Contains(transactionRequest.Account.ToLower(System.Globalization.CultureInfo.CurrentCulture)))
             {
                 await _logger.InfoAsync($"Gateway Debug for Account:{transactionRequest.Account}\n {JsonConvert.SerializeObject(transactionRequest)}");
             }
@@ -110,7 +110,7 @@ namespace Device.FingerPrint.Gateway.Handlers
 
         private async Task<HttpResponseMessage> ForwardValidTransactionAsync(TransactionRequest transactionRequest, HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            transactionRequest.TransDate = DateTime.Now;
+            transactionRequest.TransDate = DateTimeOffset.Now.DateTime;
             request.Content = new StringContent(JsonConvert.SerializeObject(transactionRequest), Encoding.UTF8, "application/json");
             return await base.SendAsync(request, cancellationToken);
         }
