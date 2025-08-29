@@ -54,7 +54,7 @@ builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(builder => builder
         .AllowAnyOrigin()
         .AllowAnyHeader()
-        .AllowAnyMethod());
+        .AllowAnyMethod().AllowCredentials());
 });
 
 builder.Services.AddSwaggerGen();
