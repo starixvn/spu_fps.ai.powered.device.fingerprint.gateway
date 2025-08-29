@@ -54,8 +54,7 @@ builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(builder => builder
         .AllowAnyOrigin()
         .AllowAnyHeader()
-        .AllowAnyMethod()
-        .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
+        .AllowAnyMethod());
 });
 
 builder.Services.AddSwaggerGen();
