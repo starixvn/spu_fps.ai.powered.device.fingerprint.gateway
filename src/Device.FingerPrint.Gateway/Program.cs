@@ -97,10 +97,11 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors();
 
 app.UseEndpoints(endpoints =>
     endpoints.MapControllers()
