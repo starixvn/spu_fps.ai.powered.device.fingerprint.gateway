@@ -1,5 +1,4 @@
 ﻿using Device.FingerPrint.Gateway.Models;
-using Fanex.Logging;
 using System.Text.Json;
 
 namespace Device.FingerPrint.Gateway.Services

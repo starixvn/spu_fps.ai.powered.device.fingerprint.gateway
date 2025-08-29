@@ -1,6 +1,5 @@
 using Device.FingerPrint.Gateway.Models;
 using Device.FingerPrint.Gateway.Services;
-using Fanex.Logging;
 using Newtonsoft.Json;
 using System.Text;
 

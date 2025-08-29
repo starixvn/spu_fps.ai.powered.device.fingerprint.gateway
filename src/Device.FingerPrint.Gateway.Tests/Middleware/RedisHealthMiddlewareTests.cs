@@ -1,7 +1,6 @@
 using NSubstitute;
 using Device.FingerPrint.Gateway.Middlewares;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using Device.FingerPrint.Gateway.Services;
 

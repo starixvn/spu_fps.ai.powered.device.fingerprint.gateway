@@ -21,6 +21,9 @@
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.MsgPack" Version="11.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+	<SonarQubeSetting Include="sonar.coverage.exclusions">
+		<Value>**/Program.cs</Value>
+	</SonarQubeSetting>
   </ItemGroup>
 
 </Project>
