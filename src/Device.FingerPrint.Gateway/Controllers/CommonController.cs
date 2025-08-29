@@ -41,7 +41,7 @@ namespace Device.FingerPrint.Gateway.Controllers
 
             if (!string.IsNullOrEmpty(proxyIP))
             {
-                var ips = proxyIP.Split([',']);
+                var ips = proxyIP.Split(',');
 
                 if (ips[0] != GetRealIp())
                 {
@@ -100,7 +100,7 @@ namespace Device.FingerPrint.Gateway.Controllers
 
                 if (!string.IsNullOrEmpty(clientIps))
                 {
-                    var ips = clientIps.Split([',']);
+                    var ips = clientIps.Split(',');
 
                     if (ips.Length > 1)
                     {
@@ -116,7 +116,7 @@ namespace Device.FingerPrint.Gateway.Controllers
             }
             else
             {
-                return proxyIP.Split([','])[0];
+                return proxyIP.Split(',')[0];
             }
         }
     }
