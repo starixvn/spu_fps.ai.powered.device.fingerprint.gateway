@@ -40,6 +40,8 @@ namespace Device.FingerPrint.Gateway.Models
 
         public string? Exceptions { get; set; }
 
+        public string? DeviceDetails { get; set; }
+
         public DateTime TransDate { get; set; }
     }
 }
