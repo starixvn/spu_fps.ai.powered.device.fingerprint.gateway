@@ -117,6 +117,7 @@ namespace Device.FingerPrint.Gateway.Tests.Models
             model.Timezone = "UTC+7";
             model.SystemLanguage = "en-US";
             model.Country = "VN";
+            model.DeviceDetails = "DeviceDetails";
             model.TransDate = testDate;
 
             // Assert
@@ -136,6 +137,7 @@ namespace Device.FingerPrint.Gateway.Tests.Models
             Assert.Equal("UTC+7", model.Timezone);
             Assert.Equal("en-US", model.SystemLanguage);
             Assert.Equal("VN", model.Country);
+            Assert.Equal("DeviceDetails", model.DeviceDetails);
             Assert.Equal(testDate, model.TransDate);
         }
     }
