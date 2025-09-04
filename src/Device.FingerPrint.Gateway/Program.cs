@@ -51,10 +51,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors(opt =>
 {
+    var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>();
     opt.AddDefaultPolicy(builder => builder
-        .AllowAnyOrigin()
+        .WithOrigins(corsOrigins)
         .AllowAnyHeader()
-        .AllowAnyMethod());
+        .AllowAnyMethod()
+        .AllowCredentials());
 });
 
 builder.Services.AddSwaggerGen();
