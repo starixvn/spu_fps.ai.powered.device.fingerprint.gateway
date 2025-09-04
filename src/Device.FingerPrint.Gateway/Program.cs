@@ -52,10 +52,9 @@ builder.Services.AddControllers();
 builder.Services.AddCors(opt =>
 {
     opt.AddDefaultPolicy(builder => builder
-        .WithOrigins(
-            "http://localhost:3000")
+        .AllowAnyOrigin()
         .AllowAnyHeader()
-        .AllowAnyMethod().AllowCredentials());
+        .AllowAnyMethod());
 });
 
 builder.Services.AddSwaggerGen();
