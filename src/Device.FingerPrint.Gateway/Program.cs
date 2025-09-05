@@ -1,3 +1,4 @@
+using AspNetCoreRateLimit;
 using Device.FingerPrint.Gateway;
 using Device.FingerPrint.Gateway.Handlers;
 using Device.FingerPrint.Gateway.Middlewares;
@@ -7,12 +8,14 @@ using Fanex.Logging.Sentry;
 using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using Ocelot.Values;
 using Prometheus;
 using StackExchange.Redis.Extensions.Core;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
 using StackExchange.Redis.Extensions.Core.Implementations;
 using StackExchange.Redis.Extensions.MsgPack;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +46,8 @@ builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
 builder.Services.AddSingleton<IRedisService, RedisService>();
 builder.Services.AddSingleton<IGatewayService, GatewayService>();
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddHealthChecks();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
@@ -58,6 +63,15 @@ builder.Services.AddCors(opt =>
         .AllowAnyMethod()
         .AllowCredentials());
 });
+
+// Config RateLimit
+builder.Services.AddMemoryCache();
+
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
+builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
+
+builder.Services.AddInMemoryRateLimiting();
+builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
 builder.Services.AddSwaggerGen();
 
@@ -96,11 +110,12 @@ app.UseSwaggerUI();
 
 app.UseRouting();
 
+app.UseIpRateLimiting();
+
 app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.UseEndpoints(endpoints =>
     endpoints.MapControllers()
