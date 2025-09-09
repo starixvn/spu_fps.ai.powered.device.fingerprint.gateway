@@ -54,12 +54,12 @@ builder.Services.AddControllers();
 
 builder.Services.AddCors(opt =>
 {
-    var corsOrigins = builder.Configuration.GetSection("CorsOrigins").Get<string[]>();
     opt.AddDefaultPolicy(builder => builder
-        .WithOrigins(corsOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+                    .WithOrigins("*")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
 });
 
 // Config RateLimit
