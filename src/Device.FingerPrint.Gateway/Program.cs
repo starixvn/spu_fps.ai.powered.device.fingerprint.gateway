@@ -44,10 +44,7 @@ builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
 builder.Services.AddSingleton<IRedisService, RedisService>();
 builder.Services.AddSingleton<IGatewayService, GatewayService>();
 
-builder.Services.AddMemoryCache();
-
 builder.Services.AddHealthChecks();
-builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
