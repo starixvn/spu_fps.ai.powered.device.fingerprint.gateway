@@ -11,7 +11,7 @@ namespace Device.FingerPrint.Gateway.Handlers
         private readonly ISubscriberService subscriberService;
         private readonly IGatewayService gatewayService;
 
-        private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "qctest5oct202019", "qatest05" };
+        private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "qctest5oct202019", "qatest05", "TestJo0101" };
 
         public ValidateHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService)
         {
