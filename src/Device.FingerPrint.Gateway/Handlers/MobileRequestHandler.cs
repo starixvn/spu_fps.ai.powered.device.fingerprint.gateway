@@ -10,14 +10,16 @@ namespace Device.FingerPrint.Gateway.Handlers
         private readonly ILogger logger;
         private readonly ISubscriberService subscriberService;
         private readonly IGatewayService gatewayService;
+        private readonly IAppSettings appSettings;
 
         private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "member19", "2hcibc0926a" };
 
-        public MobileRequestHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService)
+        public MobileRequestHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService, IAppSettings appSettings)
         {
             this.logger = logger;
             this.subscriberService = subscriberService;
             this.gatewayService = gatewayService;
+            this.appSettings = appSettings;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -118,6 +120,11 @@ namespace Device.FingerPrint.Gateway.Handlers
 
         private async Task ProcessDebugAndExceptionLoggingAsync(MobileTransactionModel transaction)
         {
+            if(!appSettings.EnableMBDebugLogging)
+            {
+                return;
+            }
+
             if (DebugAccounts.Contains(transaction.Account.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim()))
             {
                 await logger.InfoAsync($"Gateway Debug for Account:{transaction.Account}\n {JsonConvert.SerializeObject(transaction)}");
@@ -125,7 +132,7 @@ namespace Device.FingerPrint.Gateway.Handlers
 
             if (!string.IsNullOrEmpty(transaction.Exceptions))
             {
-                await logger.InfoAsync($"Mobile App Request Occurs Exception: {transaction.Exceptions}\n {JsonConvert.SerializeObject(transaction)}");
+                await logger.InfoAsync($"Mobile App Request Occurs Exception\n {transaction.Exceptions}\n {JsonConvert.SerializeObject(transaction)}");
             }
         }
 

@@ -12,6 +12,7 @@ namespace Device.FingerPrint.Gateway.Tests.Configuration
             configuration["IsUM"].Returns("false");
             configuration["GetSubscriberUrl"].Returns("http://test.com");
             configuration["Sentry:Dsn"].Returns("http://test-dsn.com");
+            configuration["EnableMBDebugLogging"].Returns("false");
             return configuration;
         }
 

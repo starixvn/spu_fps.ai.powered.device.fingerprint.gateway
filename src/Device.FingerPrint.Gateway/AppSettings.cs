@@ -11,6 +11,8 @@
         string GetSubscriberInfo { get; }
 
         string Environment { get; }
+
+        bool EnableMBDebugLogging { get; }
     }
 
     public class AppSettings : IAppSettings
@@ -36,6 +38,8 @@
             getSubscriberInfo = GetValue<string>("GetSubscriberUrl");
 
             environment = GetValue<string>("Environment");
+
+            EnableMBDebugLogging = GetValue<bool>("EnableMBDebugLogging");
         }
 
         public bool IsUM => isUM;
@@ -45,6 +49,8 @@
         public string GetSubscriberInfo => getSubscriberInfo;
 
         public string Environment => environment;
+
+        public bool EnableMBDebugLogging { get;  }
 
         public T GetValue<T>(string key)
         {
