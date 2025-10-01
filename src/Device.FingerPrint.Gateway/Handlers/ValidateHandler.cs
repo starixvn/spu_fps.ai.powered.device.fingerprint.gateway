@@ -23,6 +23,7 @@ namespace Device.FingerPrint.Gateway.Handlers
         {
             try
             {
+                LogService.Info($"Gateway login!");
                 var isDisableDI = await gatewayService.IsDisableDIAsync();
                 if (isDisableDI)
                 {
@@ -40,6 +41,7 @@ namespace Device.FingerPrint.Gateway.Handlers
                     {
                         var transactionRequest = JsonConvert.DeserializeObject<TransactionRequest>(content);
 
+                        LogService.Info($"Gateway: {transactionRequest.Account}");
                         if (transactionRequest != null && !string.IsNullOrWhiteSpace(transactionRequest?.Subscriber) && !string.IsNullOrWhiteSpace(transactionRequest.Account))
                         {
                             if (DebugAccounts.Contains(transactionRequest.Account.ToLower()))
