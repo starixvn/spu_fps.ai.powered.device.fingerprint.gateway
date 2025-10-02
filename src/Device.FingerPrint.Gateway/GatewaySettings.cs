@@ -1,27 +1,33 @@
-﻿namespace Device.FingerPrint.Core.Services
+﻿namespace Device.FingerPrint.Gateway
 {
-    using Device.FingerPrint.Core.Model;
-    using Microsoft.Extensions.Configuration;
+    public class GatewayInfo
+    {
+        public string Url { get; set; } = string.Empty;
 
-    public interface IGatewaySetting
+        public string Username { get; set; } = string.Empty;
+
+        public string Password { get; set; } = string.Empty;
+
+        public string Job { get; set; } = string.Empty;
+
+    }
+    public interface IGatewaySettings
     {
         GatewayInfo GatewayInfo { get; }
 
         T GetSection<T>(string key);
     }
-
-    public class GatewaySetting : IGatewaySetting
+    public class GatewaySettings : IGatewaySettings
     {
         private readonly IConfiguration configuration;
 
         private readonly GatewayInfo gatewayInfo;
 
-        public GatewaySetting(IConfiguration configuration)
+        public GatewaySettings(IConfiguration configuration)
         {
             this.configuration = configuration;
 
             gatewayInfo = GetSection<GatewayInfo>("GatewayConfig") ?? new GatewayInfo();
-
         }
 
         public GatewayInfo GatewayInfo => gatewayInfo;

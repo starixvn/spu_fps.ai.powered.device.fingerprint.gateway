@@ -1,13 +1,13 @@
-namespace Device.FingerPrint.Gateway.Handlers
+﻿namespace Device.FingerPrint.Gateway.Handlers
 {
-    using Fanex.Logging;
-
     public class IPCaptureHandler : DelegatingHandler
     {
+        private readonly ILogger logger;
         private readonly IHttpContextAccessor httpContextAccessor;
 
-        public IPCaptureHandler(IHttpContextAccessor httpContextAccessor)
+        public IPCaptureHandler(ILogger logger, IHttpContextAccessor httpContextAccessor)
         {
+            this.logger = logger;
             this.httpContextAccessor = httpContextAccessor;
         }
 
@@ -15,22 +15,26 @@ namespace Device.FingerPrint.Gateway.Handlers
         {
             try
             {
-                if (request != null )
+                if (request != null)
                 {
                     var ipAddress = httpContextAccessor.HttpContext?.Request?.Headers["X-Forwarded-For"].ToString();
 
-                    if (string.IsNullOrEmpty(ipAddress) && httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress != null)
+                    if(string.IsNullOrEmpty(ipAddress) && httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress != null)
+                    {
                         ipAddress = httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString();
+                    }
 
-                    if(!string.IsNullOrEmpty(ipAddress))
+                    if (!string.IsNullOrEmpty(ipAddress))
+                    {
                         request.Headers.Add("Fps-Forwarded-For", ipAddress);
+                    }
 
                     return await base.SendAsync(request, cancellationToken);
                 }
             }
             catch (Exception ex)
             {
-                LogService.Error(ex.Message, ex);
+                await logger.ErrorAsync(ex.Message, ex);
             }
 
             return new HttpResponseMessage
@@ -39,4 +43,5 @@ namespace Device.FingerPrint.Gateway.Handlers
             };
         }
     }
+
 }

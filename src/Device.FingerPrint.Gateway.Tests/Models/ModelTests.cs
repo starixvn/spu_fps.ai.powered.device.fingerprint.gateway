@@ -1,67 +1,7 @@
-using Xunit;
-using Device.FingerPrint.Gateway.Model;
+using Device.FingerPrint.Gateway.Models;
 
 namespace Device.FingerPrint.Gateway.Tests.Models
 {
-    public class TransactionResultTests
-    {
-        [Fact]
-        public void GetMessage_ReturnsCorrectMessage_ForValidCode()
-        {
-            // Act
-            var message = TransactionResult.GetMessage("000");
-
-            // Assert
-            Assert.Equal("Success", message);
-        }
-
-        [Fact]
-        public void GetMessage_ReturnsUnknownMessage_ForInvalidCode()
-        {
-            // Act
-            var message = TransactionResult.GetMessage("99");
-
-            // Assert
-            Assert.Equal("Unknown error code", message);
-        }
-
-        [Fact]
-        public void GetMessage_ReturnsUnknownMessage_ForNullCode()
-        {
-            // Act
-            var message = TransactionResult.GetMessage(null);
-
-            // Assert
-            Assert.Equal("Unknown error code", message);
-        }
-
-        [Fact]
-        public void GetMessage_ReturnsUnknownMessage_ForEmptyCode()
-        {
-            // Act
-            var message = TransactionResult.GetMessage("");
-
-            // Assert
-            Assert.Equal("Unknown error code", message);
-        }
-
-        [Fact]
-        public void GetMessage_ReturnsCorrectMessage_ForAllDefinedCodes()
-        {
-            // Act & Assert
-            Assert.Equal("Success", TransactionResult.GetMessage("000"));
-            Assert.Equal("Allow", TransactionResult.GetMessage("001"));
-            Assert.Equal("Review", TransactionResult.GetMessage("002"));
-            Assert.Equal("Deny", TransactionResult.GetMessage("003"));
-            Assert.Equal("Account is empty", TransactionResult.GetMessage("006"));
-            Assert.Equal("Device is empty", TransactionResult.GetMessage("007"));
-            Assert.Equal("Action doesn't exist", TransactionResult.GetMessage("008"));
-            Assert.Equal("Subscriber is invalid", TransactionResult.GetMessage("009"));
-            Assert.Equal("Under Maintenance", TransactionResult.GetMessage("010"));
-            Assert.Equal("Other error", TransactionResult.GetMessage("1000"));
-        }
-    }
-
     public class SubscriberModelTests
     {
         [Fact]

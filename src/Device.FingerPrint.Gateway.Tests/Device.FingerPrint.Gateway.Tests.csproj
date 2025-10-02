@@ -8,6 +8,27 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Middleware\**" />
+	  <Compile Remove="Models\**" />
+	  <Compile Remove="Services\**" />
+	  <EmbeddedResource Remove="Middleware\**" />
+	  <EmbeddedResource Remove="Models\**" />
+	  <EmbeddedResource Remove="Services\**" />
+	  <None Remove="Middleware\**" />
+	  <None Remove="Models\**" />
+	  <None Remove="Services\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Include="Middleware\ExceptionMiddlewareTests.cs" />
+	  <Compile Include="Middleware\RedisHealthMiddlewareTests.cs" />
+	  <Compile Include="Models\ModelTests.cs" />
+	  <Compile Include="Services\GatewayServiceTests.cs" />
+	  <Compile Include="Services\RedisServiceTests.cs" />
+	  <Compile Include="Services\SubscriberServiceTests.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="coverlet.collector" Version="6.0.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.3.0" />
@@ -19,15 +40,14 @@
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
 		<PackageReference Include="NSubstitute" Version="5.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Using Include="Xunit" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Device.FingerPrint.Gateway\Device.FingerPrint.Gateway.csproj" />
 	</ItemGroup>
 
 </Project>

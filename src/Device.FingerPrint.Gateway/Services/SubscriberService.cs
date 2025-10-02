@@ -1,10 +1,8 @@
+﻿using Device.FingerPrint.Gateway.Models;
+using System.Text.Json;
+
 namespace Device.FingerPrint.Gateway.Services
 {
-    using Device.FingerPrint.Gateway.Model;
-    using Device.FingerPrint.Redis;
-    using Fanex.Logging;
-    using System.Text.Json;
-
     public interface ISubscriberService
     {
         Task<bool> ValidateAsync(string subscriber);
@@ -12,11 +10,13 @@ namespace Device.FingerPrint.Gateway.Services
 
     public class SubscriberService : ISubscriberService
     {
+        private readonly ILogger logger;
         private readonly IAppSettings appSettings;
         private readonly IRedisService redisService;
 
-        public SubscriberService(IAppSettings appSettings, IRedisService redisService)
+        public SubscriberService(ILogger logger, IAppSettings appSettings, IRedisService redisService)
         {
+            this.logger = logger;
             this.appSettings = appSettings;
             this.redisService = redisService;
         }
@@ -49,13 +49,13 @@ namespace Device.FingerPrint.Gateway.Services
 
         private async Task<SubscriberModel> GetSubscriberInfo(string subName)
         {
-            if(!string.IsNullOrWhiteSpace(subName))
+            if (!string.IsNullOrWhiteSpace(subName))
             {
                 var cacheKey = $"GatewayAPI:{subName}";
 
                 var subData = await GetSubscriberInfoByCache(cacheKey, subName);
 
-                if(subData != null)
+                if (subData != null)
                 {
                     return subData;
                 }
@@ -63,19 +63,19 @@ namespace Device.FingerPrint.Gateway.Services
                 {
                     subData = await GetDataSubscriberAsync(subName);
 
-                    if(subData != null && subData.SubscriberId != 0)
+                    if (subData != null && subData.SubscriberId != 0)
                     {
                         _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, DateTimeOffset.UtcNow.AddMinutes(120));
 
                         return subData;
-                    }                    
+                    }
                 }
             }
 
             return new SubscriberModel();
         }
 
-        private async Task<SubscriberModel> GetSubscriberInfoByCache(string cacheKey, string subName)
+        private async Task<SubscriberModel?> GetSubscriberInfoByCache(string cacheKey, string subName)
         {
             try
             {
@@ -93,7 +93,8 @@ namespace Device.FingerPrint.Gateway.Services
 
             if (subData != null && subData.SubscriberId != 0)
             {
-                _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, DateTimeOffset.UtcNow.AddMinutes(120));
+                var expiredAt = DateTimeOffset.UtcNow.AddMinutes(120);
+                _ = redisService.AddAsyncAndExpiryAsync(cacheKey, subData, expiredAt);
 
                 return subData;
             }
@@ -109,25 +110,19 @@ namespace Device.FingerPrint.Gateway.Services
                 httpClient.Timeout = TimeSpan.FromMinutes(1);
                 var url = $"{appSettings.GetSubscriberInfo}?subscriberName={subName}";
 
-                var result = await httpClient.GetAsync(url)
-                    .ContinueWith((responseTask) =>
-                    {
-                        var response = responseTask.Result;
-                        var jsonString = response.Content.ReadAsStringAsync();
+                var response = await httpClient.GetAsync(url);
+                var jsonString = await response.Content.ReadAsStringAsync();
 
-                        var options = new JsonSerializerOptions
-                        {
-                            PropertyNameCaseInsensitive = true
-                        };
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
 
-                        return JsonSerializer.Deserialize<SubscriberModel>(jsonString.Result, options);
-                    });
-
-                return result ?? new SubscriberModel();
+                return JsonSerializer.Deserialize<SubscriberModel>(jsonString, options) ?? new SubscriberModel();
             }
             catch
             {
-                LogService.Error($"Cannot getSubscriber {subName} from {appSettings.GetSubscriberInfo}");
+                logger.Error($"Cannot getSubscriber {subName} from {appSettings.GetSubscriberInfo}");
                 return new SubscriberModel();
             }
         }

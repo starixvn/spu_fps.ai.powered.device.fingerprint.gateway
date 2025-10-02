@@ -1,21 +1,26 @@
-using Xunit;
 using NSubstitute;
 using Device.FingerPrint.Gateway.Services;
-using Device.FingerPrint.Gateway.Model;
-using Device.FingerPrint.Redis;
-using System.Threading.Tasks;
+using Device.FingerPrint.Gateway.Models;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {
     public class SubscriberServiceTests
     {
+        private readonly ILogger logger;
+        private readonly IAppSettings appSettings;
+        private readonly IRedisService redisService;
+
+        public SubscriberServiceTests()
+        {
+            logger = Substitute.For<ILogger>();
+            appSettings = Substitute.For<IAppSettings>();
+            redisService = Substitute.For<IRedisService>();
+        }
+
         [Fact]
         public async Task ValidateAsync_ReturnsTrue_WhenSubscriberIsValid()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
             var subscriberModel = new SubscriberModel 
             { 
                 SubscriberId = 123, 
@@ -24,7 +29,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(subscriberModel);
             
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync("ValidSubscriber");
@@ -37,10 +42,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsNull()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync(null);
@@ -53,10 +55,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsEmpty()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync("");
@@ -69,10 +68,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsWhitespace()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync("   ");
@@ -85,9 +81,6 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIdIsZero()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
             var subscriberModel = new SubscriberModel 
             { 
                 SubscriberId = 0, 
@@ -96,7 +89,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(subscriberModel);
             
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync("InvalidSubscriber");
@@ -109,12 +102,9 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public async Task ValidateAsync_ReturnsFalse_WhenSubscriberModelIsNull()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
-            
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(Task.FromResult<SubscriberModel>(null));
             
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
             var result = await subscriberService.ValidateAsync("NonExistentSubscriber");
@@ -127,11 +117,9 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         public void SubscriberService_ShouldBeCreated_WithValidDependencies()
         {
             // Arrange
-            var appSettings = Substitute.For<IAppSettings>();
-            var redisService = Substitute.For<IRedisService>();
 
             // Act
-            var subscriberService = new SubscriberService(appSettings, redisService);
+            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Assert
             Assert.NotNull(subscriberService);

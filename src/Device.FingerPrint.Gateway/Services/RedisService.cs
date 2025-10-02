@@ -1,56 +1,48 @@
-﻿namespace Device.FingerPrint.Redis
-{
-    using StackExchange.Redis;
-    using StackExchange.Redis.Extensions.Core.Abstractions;
-    using System.Threading.Tasks;
-    using Microsoft.Extensions.Logging;
+﻿using StackExchange.Redis;
+using StackExchange.Redis.Extensions.Core.Abstractions;
 
+namespace Device.FingerPrint.Gateway.Services
+{
     public interface IRedisService
     {
         IRedisDatabase RedisDatabase { get; }
 
-        IRedisDatabase RedisJSChallengeDatabase { get; }
-
-        Task<T?> HashGetAsync<T>(string hashKey, string key);
-
-        Task<bool> HashSetAsync<T>(string hashKey, string key, T value, bool isForceUpdate);
-
-        Task<bool> HashExistAsync<T>(string hashKey, string key);
-
-        Task<bool> UpdateExpiryAsync(string key, DateTimeOffset expiresAt);
-
-        Task<long> HashDeleteAsync(string hashKey, string[] keys);
-
-        Task HashSetAndExpiryAsync<T>(string hashKey, string key, T value, DateTimeOffset expiresAt, bool isForceUpdate = false);
-
-        Task<T> GetAsync<T>(string key);
-
         Task<bool> SetAsync<T>(string key, T value);
 
-        Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt);
+        Task<T?> GetAsync<T>(string key);
 
-        Task<long> HashIncrementAsync(string hashKey, string key, long value);
+        Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt);
     }
 
     public class RedisService : IRedisService
     {
-        private readonly IRedisDatabase redisDatabase;
-        private readonly IRedisDatabase redisJSChallengeDatabase;
-        private readonly ILogger<RedisService> _logger;
-        private readonly int REDIS_JSCHALLENGE_DATABASE = 10;
-        private readonly int MAX_RETRY_ATTEMPTS = 3;
-        private readonly int RETRY_DELAY_MS = 1000;
+        private const int MAX_RETRY_ATTEMPTS = 3;
+        private const int RETRY_DELAY_MS = 1000;
 
-        public RedisService(IRedisClient redisClient, ILogger<RedisService> logger)
+        private readonly IRedisDatabase redisDatabase;
+        private readonly ILogger _logger;
+
+        public RedisService(IRedisClient redisClient, ILogger logger)
         {
             redisDatabase = redisClient.GetDefaultDatabase();
-            redisJSChallengeDatabase = redisClient.GetDb(REDIS_JSCHALLENGE_DATABASE);
             _logger = logger;
         }
 
         public IRedisDatabase RedisDatabase => redisDatabase;
 
-        public IRedisDatabase RedisJSChallengeDatabase => redisJSChallengeDatabase;
+        public async Task<bool> SetAsync<T>(string key, T value)
+        {
+            return await ExecuteWithRetryAsync(async () =>
+                await redisDatabase.SetAddAsync<T>(key, value, flag: CommandFlags.FireAndForget),
+                "Set");
+        }
+
+        public async Task<T?> GetAsync<T>(string key)
+        {
+            return await ExecuteWithRetryAsync(async () =>
+                await redisDatabase.GetAsync<T>(key),
+                "Get");
+        }
 
         private async Task<T> ExecuteWithRetryAsync<T>(Func<Task<T>> operation, string operationName)
         {
@@ -62,93 +54,31 @@
                 }
                 catch (RedisConnectionException ex)
                 {
-                    _logger.LogWarning(ex, "Redis connection error on attempt {Attempt} for operation {Operation}", attempt, operationName);
-                    
+                    await _logger.WarnAsync("Redis connection error on attempt {Attempt} for operation {Operation}", attempt, operationName);
+
                     if (attempt == MAX_RETRY_ATTEMPTS)
                     {
-                        _logger.LogError(ex, "Redis operation {Operation} failed after {MaxAttempts} attempts", operationName, MAX_RETRY_ATTEMPTS);
+                        await _logger.ErrorAsync($"Redis operation {operationName} failed after {MAX_RETRY_ATTEMPTS} attempts", ex);
                         throw;
                     }
-                    
+
                     await Task.Delay(RETRY_DELAY_MS * attempt);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Unexpected error in Redis operation {Operation}", operationName);
+                    await _logger.ErrorAsync($"Unexpected error in Redis operation {operationName}", ex);
                     throw;
                 }
             }
-            
-            throw new InvalidOperationException($"Redis operation {operationName} failed after {MAX_RETRY_ATTEMPTS} attempts");
+
+            throw new InvalidOperationException($"Redis {operationName} failed after {MAX_RETRY_ATTEMPTS} attempts");
         }
 
-        public Task<bool> HashSetAsync<T>(string hashKey, string key, T value, bool isForceUpdate)
+        public async Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt)
         {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.HashSetAsync<T>(hashKey, key, value, nx: !isForceUpdate, flag: CommandFlags.FireAndForget), 
-                "HashSet");
-        }
-
-        public async Task<T?> HashGetAsync<T>(string hashKey, string key)
-        {
-            return await ExecuteWithRetryAsync(async () => 
-                await redisDatabase.HashGetAsync<T>(hashKey ?? string.Empty, key), 
-                "HashGet");
-        }
-
-        public Task<bool> HashExistAsync<T>(string hashKey, string key)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.HashExistsAsync(hashKey ?? string.Empty, key), 
-                "HashExists");
-        }
-
-        public Task<bool> UpdateExpiryAsync(string key, DateTimeOffset expiresAt)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.UpdateExpiryAsync(key ?? string.Empty, expiresAt, CommandFlags.FireAndForget), 
-                "UpdateExpiry");
-        }
-
-        public Task<long> HashDeleteAsync(string hashKey, string[] keys)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.HashDeleteAsync(hashKey ?? string.Empty, keys), 
-                "HashDelete");
-        }
-
-        public async Task HashSetAndExpiryAsync<T>(string hashKey, string key, T value, DateTimeOffset expiresAt, bool isForceUpdate = false)
-        {
-            await HashSetAsync(hashKey, key, value, isForceUpdate);
-            await UpdateExpiryAsync(hashKey, expiresAt);
-        }
-
-        public async Task<T> GetAsync<T>(string key)
-        {
-            return await ExecuteWithRetryAsync(async () => 
-                await redisDatabase.GetAsync<T>(key), 
-                "Get");
-        }
-
-        public Task<bool> SetAsync<T>(string key, T value)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.SetAddAsync<T>(key, value, flag: CommandFlags.FireAndForget), 
-                "Set");
-        }
-
-        public Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget), 
+            return await ExecuteWithRetryAsync(async () =>
+                await redisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget),
                 "AddWithExpiry");
-        }
-
-        public Task<long> HashIncrementAsync(string hashKey, string key, long value)
-        {
-            return ExecuteWithRetryAsync(async () => 
-                await redisDatabase.HashIncrementByAsync(hashKey, key, value), 
-                "HashIncrement");
         }
     }
 }

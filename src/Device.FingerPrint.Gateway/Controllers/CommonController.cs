@@ -1,13 +1,18 @@
+﻿using Device.FingerPrint.Gateway.Models;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Device.FingerPrint.Gateway.Controllers
 {
-    using Device.FingerPrint.Gateway.Model;
-    using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.AspNetCore.Mvc;
-
     [ApiController]
-    public class CommonController(IAppSettings appSettings) : ControllerBase
+    public class CommonController : ControllerBase
     {
-        private readonly IAppSettings appSettings = appSettings;
+        private readonly IAppSettings appSettings;
+
+        public CommonController(IAppSettings appSettings)
+        {
+            this.appSettings = appSettings;
+        }
 
         [HttpGet("whoami")]
         public WhoamiModel Index()
@@ -19,8 +24,8 @@ namespace Device.FingerPrint.Gateway.Controllers
             {
                 Environment = appSettings.Environment,
                 ServerName = Environment.MachineName,
-                ServerTime = DateTime.Now,
-                LocalIP = localIpAddress.ToString(),
+                ServerTime = DateTimeOffset.Now.DateTime,
+                LocalIP = localIpAddress?.ToString() ?? string.Empty,
                 ClientIP = GetHeaderIP("X-Remote-IP"),
                 FakeIP = GetFakeIp(),
                 RealIP = GetRealIp(),
@@ -29,14 +34,13 @@ namespace Device.FingerPrint.Gateway.Controllers
             };
         }
 
-
         private string GetFakeIp()
         {
             var proxyIP = GetXForWarded();
 
             if (!string.IsNullOrEmpty(proxyIP))
             {
-                var ips = proxyIP.Split(new char[] { ',' });
+                var ips = proxyIP.Split(',');
 
                 if (ips[0] != GetRealIp())
                 {
@@ -95,7 +99,7 @@ namespace Device.FingerPrint.Gateway.Controllers
 
                 if (!string.IsNullOrEmpty(clientIps))
                 {
-                    var ips = clientIps.Split(new char[] { ',' });
+                    var ips = clientIps.Split(',');
 
                     if (ips.Length > 1)
                     {
@@ -111,7 +115,7 @@ namespace Device.FingerPrint.Gateway.Controllers
             }
             else
             {
-                return proxyIP.Split(new char[] { ',' })[0];
+                return proxyIP.Split(',')[0];
             }
         }
     }

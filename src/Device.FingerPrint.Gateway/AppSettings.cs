@@ -10,9 +10,9 @@
 
         string GetSubscriberInfo { get; }
 
-        string LogstashUrl { get; }
-
         string Environment { get; }
+
+        bool EnableMBDebugLogging { get; }
     }
 
     public class AppSettings : IAppSettings
@@ -24,8 +24,6 @@
         private readonly string sentryDsn;
 
         private readonly string getSubscriberInfo;
-
-        private readonly string logstashUrl;
 
         private readonly string environment;
 
@@ -39,9 +37,9 @@
 
             getSubscriberInfo = GetValue<string>("GetSubscriberUrl");
 
-            logstashUrl = GetValue<string>("Logstash:Url");
-
             environment = GetValue<string>("Environment");
+
+            EnableMBDebugLogging = GetValue<bool>("EnableMBDebugLogging");
         }
 
         public bool IsUM => isUM;
@@ -50,24 +48,34 @@
 
         public string GetSubscriberInfo => getSubscriberInfo;
 
-        public string LogstashUrl => logstashUrl;
-
         public string Environment => environment;
+
+        public bool EnableMBDebugLogging { get;  }
 
         public T GetValue<T>(string key)
         {
-            try
-            {
-                var value = configuration[key];
+            var value = configuration[key];
 
-                var typeConverter = TypeDescriptor.GetConverter(typeof(T));
-
-                return (T)typeConverter.ConvertFromString(value);
-            }
-            catch (Exception ex)
+            if (string.IsNullOrEmpty(value))
             {
-                throw new InvalidCastException($"Key: {key}", ex);
+                throw new InvalidOperationException($"Configuration value for key '{key}' is null or empty.");
             }
+
+            var typeConverter = TypeDescriptor.GetConverter(typeof(T));
+
+            if (typeConverter == null)
+            {
+                throw new InvalidOperationException($"No type converter available for type '{typeof(T)}'.");
+            }
+
+            var convertedValue = typeConverter.ConvertFromString(value);
+
+            if (convertedValue == null)
+            {
+                throw new InvalidCastException($"Failed to convert configuration value for key '{key}' to type '{typeof(T)}'.");
+            }
+
+            return (T)convertedValue;
         }
     }
 }

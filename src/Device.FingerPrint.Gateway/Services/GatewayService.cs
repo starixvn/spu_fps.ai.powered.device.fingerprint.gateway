@@ -1,4 +1,3 @@
-using Device.FingerPrint.Redis;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Device.FingerPrint.Gateway.Services
