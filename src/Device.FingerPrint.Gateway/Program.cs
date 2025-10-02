@@ -59,7 +59,10 @@ builder.Services.AddCors(opt =>
 });
 
 // Config RateLimit
-builder.Services.AddMemoryCache();
+builder.Services.AddMemoryCache(options =>
+{    
+    options.ExpirationScanFrequency = TimeSpan.FromMinutes(15);
+});
 
 builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
 builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
