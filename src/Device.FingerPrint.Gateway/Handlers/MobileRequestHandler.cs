@@ -136,14 +136,6 @@ namespace Device.FingerPrint.Gateway.Handlers
             return await base.SendAsync(request, cancellationToken);
         }
 
-        private static HttpResponseMessage CreateOkResponse()
-        {
-            return new HttpResponseMessage
-            {
-                StatusCode = System.Net.HttpStatusCode.OK
-            };
-        }
-
         private static HttpResponseMessage CreateBadRequestResponse()
         {
             return new HttpResponseMessage
