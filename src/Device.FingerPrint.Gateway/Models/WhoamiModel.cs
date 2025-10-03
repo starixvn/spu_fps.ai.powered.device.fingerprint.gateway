@@ -19,5 +19,7 @@
         public required string ClientIP { get; set; }
 
         public required string ActualIP { get; set; }
+
+        public required string Counter { get; set; }
     }
 }

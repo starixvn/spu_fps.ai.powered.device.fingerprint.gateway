@@ -79,7 +79,8 @@ builder.Services
     })
     .AddDelegatingHandler<ValidateHandler>()
     .AddDelegatingHandler<IPCaptureHandler>()
-    .AddDelegatingHandler<MobileRequestHandler>();
+    .AddDelegatingHandler<MobileRequestHandler>()
+    .AddDelegatingHandler<RequestCounterHandler>();
 
 var app = builder.Build();
 
