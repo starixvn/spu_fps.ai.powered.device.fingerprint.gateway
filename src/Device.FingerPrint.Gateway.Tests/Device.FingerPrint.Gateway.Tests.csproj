@@ -23,7 +23,6 @@
 	  <Compile Include="Middleware\ExceptionMiddlewareTests.cs" />
 	  <Compile Include="Middleware\RedisHealthMiddlewareTests.cs" />
 	  <Compile Include="Models\ModelTests.cs" />
-	  <Compile Include="Services\GatewayServiceTests.cs" />
 	  <Compile Include="Services\RedisServiceTests.cs" />
 	  <Compile Include="Services\SubscriberServiceTests.cs" />
 	</ItemGroup>

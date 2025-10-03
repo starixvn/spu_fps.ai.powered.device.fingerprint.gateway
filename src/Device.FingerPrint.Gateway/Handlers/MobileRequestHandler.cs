@@ -9,16 +9,14 @@ namespace Device.FingerPrint.Gateway.Handlers
     {
         private readonly ILogger logger;
         private readonly ISubscriberService subscriberService;
-        private readonly IGatewayService gatewayService;
         private readonly IAppSettings appSettings;
 
         private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "member19", "2hcibc0926a" };
 
-        public MobileRequestHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService, IAppSettings appSettings)
+        public MobileRequestHandler(ILogger logger, ISubscriberService subscriberService, IAppSettings appSettings)
         {
             this.logger = logger;
             this.subscriberService = subscriberService;
-            this.gatewayService = gatewayService;
             this.appSettings = appSettings;
         }
 
@@ -26,11 +24,6 @@ namespace Device.FingerPrint.Gateway.Handlers
         {
             try
             {
-                if (await IsGatewayDisabledAsync())
-                {
-                    return CreateOkResponse();
-                }
-
                 if (!IsValidRequest(request))
                 {
                     return CreateBadRequestResponse();
@@ -56,11 +49,6 @@ namespace Device.FingerPrint.Gateway.Handlers
                 await logger.ErrorAsync($"{ex.Message} \n {request.Content}", ex);
                 return CreateBadRequestResponse();
             }
-        }
-
-        private async Task<bool> IsGatewayDisabledAsync()
-        {
-            return await gatewayService.IsDisableDIAsync();
         }
 
         private static bool IsValidRequest(HttpRequestMessage request)

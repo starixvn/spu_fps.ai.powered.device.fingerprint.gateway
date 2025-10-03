@@ -21,11 +21,10 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         {
             // Arrange
             var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
             var logger = Substitute.For<ILogger>();
             var appSettings = Substitute.For<IAppSettings>();
 
-            var handler = new MobileRequestHandler(logger, subscriberService, gatewayService, appSettings);
+            var handler = new MobileRequestHandler(logger, subscriberService, appSettings);
             var request = new HttpRequestMessage();
             request.Content = new StringContent("{\"Transaction\":{\"DeviceId\":\"test123\"}}", Encoding.UTF8, "application/json");
 
@@ -41,11 +40,10 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         {
             // Arrange
             var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
             var logger = Substitute.For<ILogger>();
             var appSettings = Substitute.For<IAppSettings>();
 
-            var handler = new MobileRequestHandler(logger, subscriberService, gatewayService, appSettings);
+            var handler = new MobileRequestHandler(logger, subscriberService, appSettings);
             var request = new HttpRequestMessage();
             request.Content = new StringContent("", Encoding.UTF8, "application/json");
 
@@ -61,11 +59,10 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         {
             // Arrange
             var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
             var logger = Substitute.For<ILogger>();
             var appSettings = Substitute.For<IAppSettings>();
 
-            var handler = new MobileRequestHandler(logger, subscriberService, gatewayService, appSettings);
+            var handler = new MobileRequestHandler(logger, subscriberService, appSettings);
             var request = new HttpRequestMessage();
             request.Content = null;
 
@@ -81,11 +78,10 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         {
             // Arrange
             var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
             var logger = Substitute.For<ILogger>();
             var appSettings = Substitute.For<IAppSettings>();
 
-            var handler = new MobileRequestHandler(logger, subscriberService, gatewayService, appSettings);
+            var handler = new MobileRequestHandler(logger, subscriberService, appSettings);
             var request = new HttpRequestMessage();
             request.Content = new StringContent("{invalid json}", Encoding.UTF8, "application/json");
 
@@ -101,12 +97,11 @@ namespace Device.FingerPrint.Gateway.Tests.Handlers
         {
             // Arrange
             var subscriberService = Substitute.For<ISubscriberService>();
-            var gatewayService = Substitute.For<IGatewayService>();
             var logger = Substitute.For<ILogger>();
             var appSettings = Substitute.For<IAppSettings>();
 
             // Act
-            var handler = new MobileRequestHandler(logger, subscriberService, gatewayService, appSettings);
+            var handler = new MobileRequestHandler(logger, subscriberService, appSettings);
 
             // Assert
             Assert.NotNull(handler);

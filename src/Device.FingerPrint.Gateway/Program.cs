@@ -42,7 +42,6 @@ builder.Services.AddSingleton<ISerializer, MsgPackObjectSerializer>();
 
 builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
 builder.Services.AddSingleton<IRedisService, RedisService>();
-builder.Services.AddSingleton<IGatewayService, GatewayService>();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();

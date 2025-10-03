@@ -9,26 +9,19 @@ namespace Device.FingerPrint.Gateway.Handlers
     {
         private readonly ILogger _logger;
         private readonly ISubscriberService subscriberService;
-        private readonly IGatewayService gatewayService;
 
         private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "qctest5oct202019", "qatest05", "testJo0101", "andy7" };
 
-        public ValidateHandler(ILogger logger, ISubscriberService subscriberService, IGatewayService gatewayService)
+        public ValidateHandler(ILogger logger, ISubscriberService subscriberService)
         {
             _logger = logger;
             this.subscriberService = subscriberService;
-            this.gatewayService = gatewayService;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             try
             {
-                if (await IsGatewayDisabledAsync())
-                {
-                    return CreateOkResponse();
-                }
-
                 if (!IsValidRequest(request))
                 {
                     return CreateBadRequestResponse();
@@ -55,11 +48,6 @@ namespace Device.FingerPrint.Gateway.Handlers
                 await _logger.ErrorAsync(ex.Message, ex);
                 return CreateBadRequestResponse();
             }
-        }
-
-        private async Task<bool> IsGatewayDisabledAsync()
-        {
-            return await gatewayService.IsDisableDIAsync();
         }
 
         private static bool IsValidRequest(HttpRequestMessage request)
