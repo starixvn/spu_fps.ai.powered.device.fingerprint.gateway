@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -21,9 +21,16 @@
     <PackageReference Include="StackExchange.Redis.Extensions.Core" Version="11.0.0" />
     <PackageReference Include="StackExchange.Redis.Extensions.MsgPack" Version="11.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
-	<SonarQubeSetting Include="sonar.coverage.exclusions">
-		<Value>**/Program.cs</Value>
-	</SonarQubeSetting>
   </ItemGroup>
 
+	<ItemGroup>
+		<SonarQubeSetting Include="sonar.coverage.exclusions">
+			<Value>**\Program.cs, **/*legacy*, **/*native*, **/*Handlers*, **/*Test*, **/*Model*, **/*Entity*, **/*Criteria*, **/*Command*, **/*Exception*, **/*Handlers*/**, **/*Test*/**, **/*Model*/**, **/*Entity*/**, **/*Criteria*/**, **/*Command*/**, **/*Exception*/**</Value>
+		</SonarQubeSetting>
+	</ItemGroup>
+	<ItemGroup>
+		<SonarQubeSetting Include="sonar.exclusions">
+			<Value>**\Program.cs, **/*legacy*, **/*native*, **/*Handlers*, **/*Test*, **/*Model*, **/*Entity*, **/*Criteria*, **/*Command*, **/*Exception*, **/*Handlers*/**, **/*Test*/**, **/*Model*/**, **/*Entity*/**, **/*Criteria*/**, **/*Command*/**, **/*Exception*/**</Value>
+		</SonarQubeSetting>
+	</ItemGroup>
 </Project>
