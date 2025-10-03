@@ -1,4 +1,3 @@
-using AspNetCoreRateLimit;
 using Device.FingerPrint.Gateway;
 using Device.FingerPrint.Gateway.Handlers;
 using Device.FingerPrint.Gateway.Middlewares;
@@ -57,17 +56,7 @@ builder.Services.AddCors(opt =>
                     .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
 });
 
-// Config RateLimit
-builder.Services.AddMemoryCache(options =>
-{    
-    options.ExpirationScanFrequency = TimeSpan.FromMinutes(15);
-});
-
-builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimiting"));
-builder.Services.Configure<IpRateLimitPolicies>(builder.Configuration.GetSection("IpRateLimitPolicies"));
-
-builder.Services.AddInMemoryRateLimiting();
-builder.Services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddSwaggerGen();
 
@@ -106,8 +95,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
-
-app.UseIpRateLimiting();
 
 app.UseCors();
 
