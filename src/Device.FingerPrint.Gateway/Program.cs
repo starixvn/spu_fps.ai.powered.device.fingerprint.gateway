@@ -4,10 +4,8 @@ using Device.FingerPrint.Gateway.Middlewares;
 using Device.FingerPrint.Gateway.Services;
 using Fanex.Logging;
 using Fanex.Logging.Sentry;
-using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-using Prometheus;
 using StackExchange.Redis.Extensions.Core;
 using StackExchange.Redis.Extensions.Core.Abstractions;
 using StackExchange.Redis.Extensions.Core.Configuration;
@@ -64,10 +62,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddOcelot(builder.Configuration)
-    .AddCacheManager(x =>
-    {
-        x.WithDictionaryHandle();
-    })
     .AddDelegatingHandler<ValidateHandler>()
     .AddDelegatingHandler<IPCaptureHandler>()
     .AddDelegatingHandler<MobileRequestHandler>();
@@ -98,32 +92,14 @@ app.UseRouting();
 
 app.UseCors();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
 app.UseEndpoints(endpoints =>
     endpoints.MapControllers()
 );
-
-// Add Prometheus metrics - DISABLED
-// app.UseMetricServer();
-// app.UseHttpMetrics();
-
-// Initialize MetricHttpService - DISABLED
-// MetricHttpService.PublicDataToGateway(gatewaySettings.GatewayInfo);
 
 app.UseHealthChecks("/healthz");
 
 await app.UseOcelot();
 
 LogService.Info($"This is Gateway API {typeof(Program).FullName} has been started at {DateTimeOffset.Now}");
-
-// Register cleanup on app shutdown - DISABLED (MetricHttpService is disabled)
-// var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-// lifetime.ApplicationStopping.Register(() =>
-// {
-//     MetricHttpService.DisposeInstance();
-//     LogService.Info("MetricHttpService disposed on application shutdown");
-// });
 
 app.Run();
