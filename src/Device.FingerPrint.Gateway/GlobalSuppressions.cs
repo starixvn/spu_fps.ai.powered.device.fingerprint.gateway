@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "<Pending>", Scope = "member", Target = "~M:Device.FingerPrint.Gateway.Controllers.CommonController.GetMemoryInfo~System.Object")]
+[assembly: SuppressMessage("Critical Code Smell", "S1215:\"GC.Collect\" should not be called", Justification = "<Pending>", Scope = "member", Target = "~M:Device.FingerPrint.Gateway.Controllers.CommonController.GetMemoryInfoWithGC~System.Object")]

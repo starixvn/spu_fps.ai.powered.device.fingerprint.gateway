@@ -21,7 +21,7 @@ namespace Device.FingerPrint.Gateway.Services
 
         private readonly IRedisDatabase redisDatabase;
         private readonly ILogger _logger;
-        private bool _disposed = false;
+        private bool _disposed;
 
         public RedisService(IRedisClient redisClient, ILogger logger)
         {

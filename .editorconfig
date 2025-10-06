@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# S1215: "GC.Collect" should not be called
+dotnet_diagnostic.S1215.severity = suggestion
