@@ -9,11 +9,9 @@ namespace Device.FingerPrint.Gateway.Controllers
     public class CommonController : ControllerBase
     {
         private readonly IAppSettings appSettings;
-        private readonly RequestCounterService requestCounterService;
         public CommonController(IAppSettings appSettings)
         {
             this.appSettings = appSettings;
-            this.requestCounterService = RequestCounterService.GetInstance();
         }
 
         [HttpGet("whoami")]
@@ -32,8 +30,7 @@ namespace Device.FingerPrint.Gateway.Controllers
                 FakeIP = GetFakeIp(),
                 RealIP = GetRealIp(),
                 XFW = GetXForWarded(),
-                ActualIP = GetHeaderIP("X-Actual-IP"),
-                Counter = requestCounterService.RequestCount.ToString()
+                ActualIP = GetHeaderIP("X-Actual-IP")
             };
         }
 
@@ -57,7 +54,6 @@ namespace Device.FingerPrint.Gateway.Controllers
                 Gen1Collections = GC.CollectionCount(1),
                 Gen2Collections = GC.CollectionCount(2),
                 TotalMemoryMB = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 2),
-                RequestCount = requestCounterService.RequestCount,
                 Timestamp = DateTimeOffset.Now
             };
         }
@@ -85,7 +81,6 @@ namespace Device.FingerPrint.Gateway.Controllers
                 Gen1Collections = GC.CollectionCount(1),
                 Gen2Collections = GC.CollectionCount(2),
                 TotalMemoryMB = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 2),
-                RequestCount = requestCounterService.RequestCount,
                 Timestamp = DateTimeOffset.Now,
                 Note = "This endpoint forces GC - use only for debugging"
             };

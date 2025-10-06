@@ -42,14 +42,13 @@ builder.Services.AddSingleton<ISerializer, MsgPackObjectSerializer>();
 builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
 builder.Services.AddSingleton<IRedisService, RedisService>();
 
-builder.Services.AddHealthChecks();
-builder.Services.AddHttpContextAccessor();
-
-// Configure HttpClient with proper lifecycle management
-builder.Services.AddHttpClient("SubscriberService", client =>
+builder.Services.AddHttpClient<ISubscriberService, SubscriberService>(client =>
 {
     client.Timeout = TimeSpan.FromMinutes(1);
 });
+
+builder.Services.AddHealthChecks();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers();
 
@@ -58,11 +57,8 @@ builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(builder => builder
                     .WithOrigins("*")
                     .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
+                    .AllowAnyMethod());
 });
-
-builder.Services.AddMemoryCache();
 
 builder.Services.AddSwaggerGen();
 
@@ -74,8 +70,7 @@ builder.Services
     })
     .AddDelegatingHandler<ValidateHandler>()
     .AddDelegatingHandler<IPCaptureHandler>()
-    .AddDelegatingHandler<MobileRequestHandler>()
-    .AddDelegatingHandler<RequestCounterHandler>();
+    .AddDelegatingHandler<MobileRequestHandler>();
 
 var app = builder.Build();
 
@@ -95,7 +90,6 @@ LogManager
     });
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<RedisHealthMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
