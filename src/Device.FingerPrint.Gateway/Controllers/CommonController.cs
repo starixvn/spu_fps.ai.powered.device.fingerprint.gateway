@@ -1,5 +1,4 @@
 ﻿using Device.FingerPrint.Gateway.Models;
-using Device.FingerPrint.Gateway.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,58 +30,6 @@ namespace Device.FingerPrint.Gateway.Controllers
                 RealIP = GetRealIp(),
                 XFW = GetXForWarded(),
                 ActualIP = GetHeaderIP("X-Actual-IP")
-            };
-        }
-
-        [HttpGet("memory")]
-        public object GetMemoryInfo()
-        {
-            var process = System.Diagnostics.Process.GetCurrentProcess();
-            var workingSet = process.WorkingSet64;
-            var privateMemory = process.PrivateMemorySize64;
-            var virtualMemory = process.VirtualMemorySize64;
-            
-            // Removed forced GC.Collect() calls to prevent memory pressure
-            // Let .NET manage garbage collection naturally
-            
-            return new
-            {
-                WorkingSetMB = Math.Round(workingSet / 1024.0 / 1024.0, 2),
-                PrivateMemoryMB = Math.Round(privateMemory / 1024.0 / 1024.0, 2),
-                VirtualMemoryMB = Math.Round(virtualMemory / 1024.0 / 1024.0, 2),
-                Gen0Collections = GC.CollectionCount(0),
-                Gen1Collections = GC.CollectionCount(1),
-                Gen2Collections = GC.CollectionCount(2),
-                TotalMemoryMB = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 2),
-                Timestamp = DateTimeOffset.Now
-            };
-        }
-
-        [HttpGet("memory/force-gc")]
-        public object GetMemoryInfoWithGC()
-        {
-            var process = System.Diagnostics.Process.GetCurrentProcess();
-            var workingSet = process.WorkingSet64;
-            var privateMemory = process.PrivateMemorySize64;
-            var virtualMemory = process.VirtualMemorySize64;
-            
-            // Only use this endpoint for debugging purposes
-            // Force garbage collection to see actual memory usage
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-            
-            return new
-            {
-                WorkingSetMB = Math.Round(workingSet / 1024.0 / 1024.0, 2),
-                PrivateMemoryMB = Math.Round(privateMemory / 1024.0 / 1024.0, 2),
-                VirtualMemoryMB = Math.Round(virtualMemory / 1024.0 / 1024.0, 2),
-                Gen0Collections = GC.CollectionCount(0),
-                Gen1Collections = GC.CollectionCount(1),
-                Gen2Collections = GC.CollectionCount(2),
-                TotalMemoryMB = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 2),
-                Timestamp = DateTimeOffset.Now,
-                Note = "This endpoint forces GC - use only for debugging"
             };
         }
 
