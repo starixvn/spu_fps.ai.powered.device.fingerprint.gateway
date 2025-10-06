@@ -33,7 +33,7 @@ namespace Device.FingerPrint.Gateway.Services
         public async Task<bool> SetAsync<T>(string key, T value)
         {
             return await ExecuteWithRetryAsync(async () =>
-                await redisDatabase.SetAddAsync<T>(key, value, flag: CommandFlags.FireAndForget),
+                await redisDatabase.SetAddAsync<T>(key, value),
                 "Set");
         }
 
@@ -77,7 +77,7 @@ namespace Device.FingerPrint.Gateway.Services
         public async Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt)
         {
             return await ExecuteWithRetryAsync(async () =>
-                await redisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget),
+                await redisDatabase.AddAsync(key, value, expiresAt),
                 "AddWithExpiry");
         }
     }

@@ -3,13 +3,26 @@ namespace Device.FingerPrint.Gateway.Services
 {
     public class RequestCounterService
     {
-        private static readonly Lock _lock = new();
+        private static readonly object _lock = new object();
         private static RequestCounterService? _instance;
-        public Int64 RequestCount { get; private set; }
+        private long _requestCount;
+        
+        public long RequestCount 
+        { 
+            get 
+            { 
+                lock (_lock) 
+                { 
+                    return _requestCount; 
+                } 
+            } 
+        }
+        
         private RequestCounterService()
         {
-            RequestCount = 0;
+            _requestCount = 0;
         }
+        
         public static RequestCounterService GetInstance()
         {
             if (_instance == null)
@@ -21,11 +34,20 @@ namespace Device.FingerPrint.Gateway.Services
             }
             return _instance;
         }
+        
         public void Increment()
         {
             lock (_lock)
             {
-                RequestCount++;
+                _requestCount++;
+            }
+        }
+        
+        public void Reset()
+        {
+            lock (_lock)
+            {
+                _requestCount = 0;
             }
         }
     }

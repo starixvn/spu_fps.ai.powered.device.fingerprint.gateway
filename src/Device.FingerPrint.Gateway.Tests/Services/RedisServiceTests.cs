@@ -31,7 +31,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             // Arrange
             const string key = "test-key";
             const string value = "test-value";
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(true);
 
             // Act
@@ -39,7 +39,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             // Arrange
             const string key = "test-key";
             const string value = "test-value";
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(false);
 
             // Act
@@ -56,7 +56,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.False(result);
-            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string value = "test-value";
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(Task.FromException<bool>(connectionException), Task.FromResult(true));
 
             // Act
@@ -75,7 +75,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(2).SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(2).SetAddAsync<string>(key, value);
             await mockLogger.Received(1).WarnAsync("Redis connection error on attempt {Attempt} for operation {Operation}", 1, "Set");
         }
 
@@ -87,14 +87,14 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string value = "test-value";
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(Task.FromException<bool>(connectionException));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<RedisConnectionException>(() => redisService.SetAsync(key, value));
             Assert.Equal(connectionException, exception);
             
-            await mockRedisDatabase.Received(3).SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(3).SetAddAsync<string>(key, value);
             await mockLogger.Received(3).WarnAsync("Redis connection error on attempt {Attempt} for operation {Operation}", Arg.Any<int>(), "Set");
             await mockLogger.Received(1).ErrorAsync("Redis operation Set failed after 3 attempts", connectionException);
         }
@@ -107,14 +107,14 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string value = "test-value";
             var unexpectedException = new InvalidOperationException("Unexpected error");
             
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(Task.FromException<bool>(unexpectedException));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => redisService.SetAsync(key, value));
             Assert.Equal(unexpectedException, exception);
             
-            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).SetAddAsync<string>(key, value);
             await mockLogger.Received(1).ErrorAsync("Unexpected error in Redis operation Set", unexpectedException);
         }
 
@@ -124,7 +124,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             // Arrange
             const string key = "test-key";
             var complexValue = new { Id = 1, Name = "Test", Items = new[] { "a", "b", "c" } };
-            mockRedisDatabase.SetAddAsync(key, complexValue, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync(key, complexValue)
                 .Returns(true);
 
             // Act
@@ -132,7 +132,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(1).SetAddAsync(key, complexValue, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).SetAddAsync(key, complexValue);
         }
 
         #endregion
@@ -236,7 +236,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string key = "test-key";
             const string value = "test-value";
             var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
-            mockRedisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, value, expiresAt)
                 .Returns(true);
 
             // Act
@@ -244,7 +244,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt);
         }
 
         [Fact]
@@ -254,7 +254,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string key = "test-key";
             const string value = "test-value";
             var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
-            mockRedisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, value, expiresAt)
                 .Returns(false);
 
             // Act
@@ -262,7 +262,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.False(result);
-            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt);
         }
 
         [Fact]
@@ -274,7 +274,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             
-            mockRedisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, value, expiresAt)
                 .Returns(Task.FromException<bool>(connectionException), Task.FromResult(true));
 
             // Act
@@ -282,7 +282,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(2).AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(2).AddAsync(key, value, expiresAt);
             await mockLogger.Received(1).WarnAsync("Redis connection error on attempt {Attempt} for operation {Operation}", 1, "AddWithExpiry");
         }
 
@@ -295,14 +295,14 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             
-            mockRedisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, value, expiresAt)
                 .Returns(Task.FromException<bool>(connectionException));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<RedisConnectionException>(() => redisService.AddAsyncAndExpiryAsync(key, value, expiresAt));
             Assert.Equal(connectionException, exception);
             
-            await mockRedisDatabase.Received(3).AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(3).AddAsync(key, value, expiresAt);
             await mockLogger.Received(3).WarnAsync("Redis connection error on attempt {Attempt} for operation {Operation}", Arg.Any<int>(), "AddWithExpiry");
             await mockLogger.Received(1).ErrorAsync("Redis operation AddWithExpiry failed after 3 attempts", connectionException);
         }
@@ -314,7 +314,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string key = "test-key";
             const string value = "test-value";
             var expiresAt = DateTimeOffset.UtcNow.AddDays(-1); // Expired date
-            mockRedisDatabase.AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, value, expiresAt)
                 .Returns(false);
 
             // Act
@@ -322,7 +322,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.False(result);
-            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).AddAsync(key, value, expiresAt);
         }
 
         [Fact]
@@ -332,7 +332,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string key = "test-key";
             var complexValue = new { Id = 1, Name = "Test", Items = new[] { "a", "b", "c" } };
             var expiresAt = DateTimeOffset.UtcNow.AddHours(1);
-            mockRedisDatabase.AddAsync(key, complexValue, expiresAt, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.AddAsync(key, complexValue, expiresAt)
                 .Returns(true);
 
             // Act
@@ -340,7 +340,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
 
             // Assert
             Assert.True(result);
-            await mockRedisDatabase.Received(1).AddAsync(key, complexValue, expiresAt, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).AddAsync(key, complexValue, expiresAt);
         }
 
         #endregion
@@ -356,7 +356,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(Task.FromException<bool>(connectionException), Task.FromResult(true));
 
             // Act
@@ -375,7 +375,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string value = "test-value";
             var connectionException = new RedisConnectionException(ConnectionFailureType.SocketClosed, "Connection failed");
             
-            mockRedisDatabase.SetAddAsync<string>(key, value, flag: CommandFlags.FireAndForget)
+            mockRedisDatabase.SetAddAsync<string>(key, value)
                 .Returns(Task.FromException<bool>(connectionException));
 
             // Act & Assert
@@ -400,7 +400,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             const string value1 = "value1";
             const string value2 = "value2";
             
-            mockRedisDatabase.SetAddAsync<string>(key1, value1, flag: CommandFlags.FireAndForget).Returns(true);
+            mockRedisDatabase.SetAddAsync<string>(key1, value1).Returns(true);
             mockRedisDatabase.GetAsync<string>(key2).Returns(value2);
 
             // Act
@@ -410,7 +410,7 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             // Assert
             Assert.True(setResult);
             Assert.Equal(value2, getResult);
-            await mockRedisDatabase.Received(1).SetAddAsync<string>(key1, value1, flag: CommandFlags.FireAndForget);
+            await mockRedisDatabase.Received(1).SetAddAsync<string>(key1, value1);
             await mockRedisDatabase.Received(1).GetAsync<string>(key2);
         }
 

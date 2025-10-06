@@ -1,6 +1,8 @@
 using NSubstitute;
 using Device.FingerPrint.Gateway.Services;
 using Device.FingerPrint.Gateway.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Http;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {
@@ -9,12 +11,29 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         private readonly ILogger logger;
         private readonly IAppSettings appSettings;
         private readonly IRedisService redisService;
+        private readonly IHttpClientFactory httpClientFactory;
+        private readonly SubscriberService sut; // Add System Under Test
 
         public SubscriberServiceTests()
         {
             logger = Substitute.For<ILogger>();
             appSettings = Substitute.For<IAppSettings>();
             redisService = Substitute.For<IRedisService>();
+            httpClientFactory = Substitute.For<IHttpClientFactory>();
+            sut = new SubscriberService(logger, appSettings, redisService, httpClientFactory); // Initialize once
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("   ")]
+        public async Task ValidateAsync_ReturnsFalse_ForInvalidSubscriberInput(string subscriberInput)
+        {
+            // Act
+            var result = await sut.ValidateAsync(subscriberInput);
+
+            // Assert
+            Assert.False(result);
         }
 
         [Fact]
@@ -28,74 +47,34 @@ namespace Device.FingerPrint.Gateway.Tests.Services
             };
             
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(subscriberModel);
-            
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
-            var result = await subscriberService.ValidateAsync("ValidSubscriber");
+            var result = await sut.ValidateAsync("ValidSubscriber");
 
             // Assert
             Assert.True(result);
+            await redisService.Received(1).GetAsync<SubscriberModel>(Arg.Any<string>());
         }
 
-        [Fact]
-        public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsNull()
-        {
-            // Arrange
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
-
-            // Act
-            var result = await subscriberService.ValidateAsync(null);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsEmpty()
-        {
-            // Arrange
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
-
-            // Act
-            var result = await subscriberService.ValidateAsync("");
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIsWhitespace()
-        {
-            // Arrange
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
-
-            // Act
-            var result = await subscriberService.ValidateAsync("   ");
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task ValidateAsync_ReturnsFalse_WhenSubscriberIdIsZero()
+        [Theory]
+        [InlineData(0)]  // Invalid ID
+        public async Task ValidateAsync_ReturnsFalse_WhenSubscriberModelIsInvalid(int subscriberId)
         {
             // Arrange
             var subscriberModel = new SubscriberModel 
             { 
-                SubscriberId = 0, 
+                SubscriberId = subscriberId, 
                 SubscriberName = "TestSubscriber" 
             };
             
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(subscriberModel);
-            
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
-            var result = await subscriberService.ValidateAsync("InvalidSubscriber");
+            var result = await sut.ValidateAsync("InvalidSubscriber");
 
             // Assert
             Assert.False(result);
+            await redisService.Received(1).GetAsync<SubscriberModel>(Arg.Any<string>());
         }
 
         [Fact]
@@ -103,26 +82,13 @@ namespace Device.FingerPrint.Gateway.Tests.Services
         {
             // Arrange
             redisService.GetAsync<SubscriberModel>(Arg.Any<string>()).Returns(Task.FromResult<SubscriberModel>(null));
-            
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
 
             // Act
-            var result = await subscriberService.ValidateAsync("NonExistentSubscriber");
+            var result = await sut.ValidateAsync("NonExistentSubscriber");
 
             // Assert
             Assert.False(result);
-        }
-
-        [Fact]
-        public void SubscriberService_ShouldBeCreated_WithValidDependencies()
-        {
-            // Arrange
-
-            // Act
-            var subscriberService = new SubscriberService(logger, appSettings, redisService);
-
-            // Assert
-            Assert.NotNull(subscriberService);
+            await redisService.Received(1).GetAsync<SubscriberModel>(Arg.Any<string>());
         }
     }
 }

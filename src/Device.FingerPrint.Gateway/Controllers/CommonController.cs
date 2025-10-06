@@ -37,6 +37,32 @@ namespace Device.FingerPrint.Gateway.Controllers
             };
         }
 
+        [HttpGet("memory")]
+        public object GetMemoryInfo()
+        {
+            var process = System.Diagnostics.Process.GetCurrentProcess();
+            var workingSet = process.WorkingSet64;
+            var privateMemory = process.PrivateMemorySize64;
+            var virtualMemory = process.VirtualMemorySize64;
+            
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            
+            return new
+            {
+                WorkingSetMB = Math.Round(workingSet / 1024.0 / 1024.0, 2),
+                PrivateMemoryMB = Math.Round(privateMemory / 1024.0 / 1024.0, 2),
+                VirtualMemoryMB = Math.Round(virtualMemory / 1024.0 / 1024.0, 2),
+                Gen0Collections = GC.CollectionCount(0),
+                Gen1Collections = GC.CollectionCount(1),
+                Gen2Collections = GC.CollectionCount(2),
+                TotalMemoryMB = Math.Round(GC.GetTotalMemory(false) / 1024.0 / 1024.0, 2),
+                RequestCount = requestCounterService.RequestCount,
+                Timestamp = DateTimeOffset.Now
+            };
+        }
+
         private string GetFakeIp()
         {
             var proxyIP = GetXForWarded();

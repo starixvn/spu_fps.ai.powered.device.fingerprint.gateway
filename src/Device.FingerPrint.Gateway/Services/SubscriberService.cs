@@ -13,12 +13,14 @@ namespace Device.FingerPrint.Gateway.Services
         private readonly ILogger logger;
         private readonly IAppSettings appSettings;
         private readonly IRedisService redisService;
+        private readonly IHttpClientFactory httpClientFactory;
 
-        public SubscriberService(ILogger logger, IAppSettings appSettings, IRedisService redisService)
+        public SubscriberService(ILogger logger, IAppSettings appSettings, IRedisService redisService, IHttpClientFactory httpClientFactory)
         {
             this.logger = logger;
             this.appSettings = appSettings;
             this.redisService = redisService;
+            this.httpClientFactory = httpClientFactory;
         }
 
         public async Task<bool> ValidateAsync(string subscriber)
@@ -106,8 +108,7 @@ namespace Device.FingerPrint.Gateway.Services
         {
             try
             {
-                using var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromMinutes(1);
+                using var httpClient = httpClientFactory.CreateClient("SubscriberService");
                 var url = $"{appSettings.GetSubscriberInfo}?subscriberName={subName}";
 
                 var response = await httpClient.GetAsync(url);

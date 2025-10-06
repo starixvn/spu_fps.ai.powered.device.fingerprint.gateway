@@ -4,23 +4,70 @@ using System.Text;
 
 namespace Device.FingerPrint.Gateway.Services
 {
-    public static class MetricHttpService
+    public class MetricHttpService : IDisposable
     {
-        public static void PublicDataToGateway(GatewayInfo gatewayInfo)
+        private static MetricHttpService? _instance;
+        private static readonly object _lock = new object();
+        private readonly MetricPusher? _pusher;
+        private readonly HttpClient? _httpClient;
+        private bool _disposed;
+
+        public MetricHttpService()
+        {
+            // Default constructor for DI
+        }
+
+        private MetricHttpService(GatewayInfo gatewayInfo)
         {
             var headerValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{gatewayInfo.Username}:{gatewayInfo.Password}"));
-            var httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", headerValue);
+            _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", headerValue);
 
-            var pusher = new MetricPusher(new MetricPusherOptions
+            _pusher = new MetricPusher(new MetricPusherOptions
             {
                 Endpoint = gatewayInfo.Url,
                 Job = gatewayInfo.Job,
                 Instance = Environment.MachineName,
-                HttpClientProvider = () => httpClient
+                HttpClientProvider = () => _httpClient
             });
 
-            pusher.Start();
+            _pusher.Start();
+        }
+
+        public static void PublicDataToGateway(GatewayInfo gatewayInfo)
+        {
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    _instance ??= new MetricHttpService(gatewayInfo);
+                }
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _pusher?.Stop();
+                    _pusher?.Dispose();
+                    _httpClient?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~MetricHttpService()
+        {
+            Dispose(false);
         }
     }
 }

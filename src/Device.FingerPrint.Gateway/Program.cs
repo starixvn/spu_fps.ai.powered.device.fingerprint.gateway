@@ -35,7 +35,7 @@ if (redisConfiguration != null)
 
 builder.Services.AddSingleton(redisConfiguration);
 
-builder.Services.AddSingleton<IRedisClient, RedisClient>();
+builder.Services.AddSingleton<IRedisClient, RedisClient>();             
 builder.Services.AddSingleton<IRedisConnectionPoolManager, RedisConnectionPoolManager>();
 builder.Services.AddSingleton<ISerializer, MsgPackObjectSerializer>();
 
@@ -44,6 +44,12 @@ builder.Services.AddSingleton<IRedisService, RedisService>();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();
+
+// Configure HttpClient with proper lifecycle management
+builder.Services.AddHttpClient("SubscriberService", client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(1);
+});
 
 builder.Services.AddControllers();
 
@@ -108,6 +114,8 @@ app.UseEndpoints(endpoints =>
 // Add Prometheus metrics
 app.UseMetricServer();
 app.UseHttpMetrics();
+
+// Initialize MetricHttpService
 MetricHttpService.PublicDataToGateway(gatewaySettings.GatewayInfo);
 
 app.UseHealthChecks("/healthz");
