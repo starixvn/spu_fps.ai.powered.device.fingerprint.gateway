@@ -45,6 +45,18 @@ namespace Device.FingerPrint.Gateway.Services
             }
         }
 
+        public static void DisposeInstance()
+        {
+            if (_instance != null)
+            {
+                lock (_lock)
+                {
+                    _instance?.Dispose();
+                    _instance = null;
+                }
+            }
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)

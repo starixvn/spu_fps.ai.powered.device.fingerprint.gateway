@@ -14,13 +14,14 @@ namespace Device.FingerPrint.Gateway.Services
         Task<bool> AddAsyncAndExpiryAsync<T>(string key, T value, DateTimeOffset expiresAt);
     }
 
-    public class RedisService : IRedisService
+    public class RedisService : IRedisService, IDisposable
     {
         private const int MAX_RETRY_ATTEMPTS = 3;
         private const int RETRY_DELAY_MS = 1000;
 
         private readonly IRedisDatabase redisDatabase;
         private readonly ILogger _logger;
+        private bool _disposed = false;
 
         public RedisService(IRedisClient redisClient, ILogger logger)
         {
@@ -79,6 +80,30 @@ namespace Device.FingerPrint.Gateway.Services
             return await ExecuteWithRetryAsync(async () =>
                 await redisDatabase.AddAsync(key, value, expiresAt),
                 "AddWithExpiry");
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    // Redis connections are typically managed by the connection pool
+                    // No explicit disposal needed for IRedisDatabase
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~RedisService()
+        {
+            Dispose(false);
         }
     }
 }

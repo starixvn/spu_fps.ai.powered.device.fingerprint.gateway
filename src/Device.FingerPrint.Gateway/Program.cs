@@ -111,17 +111,25 @@ app.UseEndpoints(endpoints =>
     endpoints.MapControllers()
 );
 
-// Add Prometheus metrics
-app.UseMetricServer();
-app.UseHttpMetrics();
+// Add Prometheus metrics - DISABLED
+// app.UseMetricServer();
+// app.UseHttpMetrics();
 
-// Initialize MetricHttpService
-MetricHttpService.PublicDataToGateway(gatewaySettings.GatewayInfo);
+// Initialize MetricHttpService - DISABLED
+// MetricHttpService.PublicDataToGateway(gatewaySettings.GatewayInfo);
 
 app.UseHealthChecks("/healthz");
 
 await app.UseOcelot();
 
 LogService.Info($"This is Gateway API {typeof(Program).FullName} has been started at {DateTimeOffset.Now}");
+
+// Register cleanup on app shutdown - DISABLED (MetricHttpService is disabled)
+// var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+// lifetime.ApplicationStopping.Register(() =>
+// {
+//     MetricHttpService.DisposeInstance();
+//     LogService.Info("MetricHttpService disposed on application shutdown");
+// });
 
 app.Run();
