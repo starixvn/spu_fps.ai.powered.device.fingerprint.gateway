@@ -1,4 +1,5 @@
-﻿using Prometheus;
+﻿using Device.FingerPrint.Gateway.Models;
+using Prometheus;
 using System.Net.Http.Headers;
 using System.Text;
 

@@ -1,6 +1,7 @@
 using Device.FingerPrint.Gateway.Services;
 using Xunit;
 using System.Reflection;
+using Device.FingerPrint.Gateway.Models;
 
 namespace Device.FingerPrint.Gateway.Tests.Services
 {
