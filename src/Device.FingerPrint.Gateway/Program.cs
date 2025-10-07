@@ -36,8 +36,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddOcelot(builder.Configuration)
-    .AddDelegatingHandler<IPCaptureHandler>()
-    .AddDelegatingHandler<MobileRequestHandler>();
+    .AddDelegatingHandler<IPCaptureHandler>();
 
 var app = builder.Build();
 
