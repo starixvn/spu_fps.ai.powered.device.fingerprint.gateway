@@ -1,5 +1,4 @@
 ﻿using Device.FingerPrint.Gateway.Models;
-using Device.FingerPrint.Gateway.Services;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,11 +8,9 @@ namespace Device.FingerPrint.Gateway.Controllers
     public class CommonController : ControllerBase
     {
         private readonly IAppSettings appSettings;
-        private readonly RequestCounterService requestCounterService;
         public CommonController(IAppSettings appSettings)
         {
             this.appSettings = appSettings;
-            this.requestCounterService = RequestCounterService.GetInstance();
         }
 
         [HttpGet("whoami")]
@@ -32,8 +29,7 @@ namespace Device.FingerPrint.Gateway.Controllers
                 FakeIP = GetFakeIp(),
                 RealIP = GetRealIp(),
                 XFW = GetXForWarded(),
-                ActualIP = GetHeaderIP("X-Actual-IP"),
-                Counter = requestCounterService.RequestCount.ToString()
+                ActualIP = GetHeaderIP("X-Actual-IP")
             };
         }
 

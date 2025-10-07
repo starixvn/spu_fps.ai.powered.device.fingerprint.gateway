@@ -1,17 +1,12 @@
-using Device.FingerPrint.Gateway;
 using Device.FingerPrint.Gateway.Handlers;
 using Device.FingerPrint.Gateway.Middlewares;
+using Device.FingerPrint.Gateway.Models;
 using Device.FingerPrint.Gateway.Services;
 using Fanex.Logging;
 using Fanex.Logging.Sentry;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Prometheus;
-using StackExchange.Redis.Extensions.Core;
-using StackExchange.Redis.Extensions.Core.Abstractions;
-using StackExchange.Redis.Extensions.Core.Configuration;
-using StackExchange.Redis.Extensions.Core.Implementations;
-using StackExchange.Redis.Extensions.MsgPack;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,25 +16,6 @@ builder.Configuration
 builder.Services.AddSingleton<IAppSettings, AppSettings>();
 builder.Services.AddSingleton<IGatewaySettings, GatewaySettings>();
 builder.Services.AddSingleton<ILogger, Logger>();
-
-var redisConfiguration = builder.Configuration.GetSection("Redis").Get<RedisConfiguration>();
-if (redisConfiguration != null)
-{
-    redisConfiguration.ConnectTimeout = 10000;
-    redisConfiguration.ConnectRetry = 10;
-    redisConfiguration.AbortOnConnectFail = false;
-
-    redisConfiguration.PoolSize = 50;
-}
-
-builder.Services.AddSingleton(redisConfiguration);
-
-builder.Services.AddSingleton<IRedisClient, RedisClient>();
-builder.Services.AddSingleton<IRedisConnectionPoolManager, RedisConnectionPoolManager>();
-builder.Services.AddSingleton<ISerializer, MsgPackObjectSerializer>();
-
-builder.Services.AddSingleton<ISubscriberService, SubscriberService>();
-builder.Services.AddSingleton<IRedisService, RedisService>();
 
 builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();
@@ -55,16 +31,13 @@ builder.Services.AddCors(opt =>
                     .SetPreflightMaxAge(TimeSpan.FromMinutes(30)));
 });
 
-builder.Services.AddMemoryCache();
 
 builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddOcelot(builder.Configuration)
-    .AddDelegatingHandler<ValidateHandler>()
     .AddDelegatingHandler<IPCaptureHandler>()
-    .AddDelegatingHandler<MobileRequestHandler>()
-    .AddDelegatingHandler<RequestCounterHandler>();
+    .AddDelegatingHandler<MobileRequestHandler>();
 
 var app = builder.Build();
 
@@ -84,7 +57,6 @@ LogManager
     });
 
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseMiddleware<RedisHealthMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -92,9 +64,6 @@ app.UseSwaggerUI();
 app.UseRouting();
 
 app.UseCors();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
     endpoints.MapControllers()

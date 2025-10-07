@@ -1,5 +1,4 @@
 ﻿using Device.FingerPrint.Gateway.Models;
-using Device.FingerPrint.Gateway.Services;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -8,15 +7,13 @@ namespace Device.FingerPrint.Gateway.Handlers
     public class MobileRequestHandler : DelegatingHandler
     {
         private readonly ILogger logger;
-        private readonly ISubscriberService subscriberService;
         private readonly IAppSettings appSettings;
 
         private static readonly HashSet<string> DebugAccounts = new HashSet<string> { "member19", "2hcibc0926a" };
 
-        public MobileRequestHandler(ILogger logger, ISubscriberService subscriberService, IAppSettings appSettings)
+        public MobileRequestHandler(ILogger logger, IAppSettings appSettings)
         {
             this.logger = logger;
-            this.subscriberService = subscriberService;
             this.appSettings = appSettings;
         }
 
@@ -36,11 +33,6 @@ namespace Device.FingerPrint.Gateway.Handlers
                 }
 
                 await ProcessDebugAndExceptionLoggingAsync(mobileTransaction);
-
-                if (!await IsValidSubscriberAsync(mobileTransaction.Subscriber))
-                {
-                    return CreateBadRequestResponse();
-                }
 
                 return await ForwardValidTransactionAsync(mobileTransaction, request, cancellationToken);
             }
@@ -124,14 +116,8 @@ namespace Device.FingerPrint.Gateway.Handlers
             }
         }
 
-        private async Task<bool> IsValidSubscriberAsync(string subscriber)
-        {
-            return await subscriberService.ValidateAsync(subscriber);
-        }
-
         private async Task<HttpResponseMessage> ForwardValidTransactionAsync(MobileTransactionModel transaction, HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            transaction.TransDate = DateTimeOffset.Now.DateTime;
             request.Content = new StringContent(JsonConvert.SerializeObject(transaction), Encoding.UTF8, "application/json");
             return await base.SendAsync(request, cancellationToken);
         }
