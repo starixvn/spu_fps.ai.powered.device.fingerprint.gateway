@@ -4,7 +4,6 @@ using Device.FingerPrint.Gateway.Middlewares;
 using Device.FingerPrint.Gateway.Services;
 using Fanex.Logging;
 using Fanex.Logging.Sentry;
-using Ocelot.Cache.CacheManager;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
 using Prometheus;
@@ -62,10 +61,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services
     .AddOcelot(builder.Configuration)
-    .AddCacheManager(x =>
-    {
-        x.WithDictionaryHandle();
-    })
     .AddDelegatingHandler<ValidateHandler>()
     .AddDelegatingHandler<IPCaptureHandler>()
     .AddDelegatingHandler<MobileRequestHandler>()
