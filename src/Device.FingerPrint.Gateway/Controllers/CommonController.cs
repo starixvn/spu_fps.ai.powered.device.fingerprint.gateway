@@ -8,7 +8,6 @@ namespace Device.FingerPrint.Gateway.Controllers
     public class CommonController : ControllerBase
     {
         private readonly IAppSettings appSettings;
-
         public CommonController(IAppSettings appSettings)
         {
             this.appSettings = appSettings;

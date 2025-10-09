@@ -1,4 +1,4 @@
-﻿namespace Device.FingerPrint.Gateway
+﻿namespace Device.FingerPrint.Gateway.Models
 {
     using System.ComponentModel;
 
@@ -7,8 +7,6 @@
         bool IsUM { get; }
 
         string SentryDsn { get; }
-
-        string GetSubscriberInfo { get; }
 
         string Environment { get; }
 
@@ -23,7 +21,6 @@
 
         private readonly string sentryDsn;
 
-        private readonly string getSubscriberInfo;
 
         private readonly string environment;
 
@@ -35,8 +32,6 @@
 
             sentryDsn = GetValue<string>("Sentry:Dsn");
 
-            getSubscriberInfo = GetValue<string>("GetSubscriberUrl");
-
             environment = GetValue<string>("Environment");
 
             EnableMBDebugLogging = GetValue<bool>("EnableMBDebugLogging");
@@ -45,8 +40,6 @@
         public bool IsUM => isUM;
 
         public string SentryDsn => sentryDsn;
-
-        public string GetSubscriberInfo => getSubscriberInfo;
 
         public string Environment => environment;
 

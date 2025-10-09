@@ -1,4 +1,4 @@
-﻿namespace Device.FingerPrint.Gateway
+﻿namespace Device.FingerPrint.Gateway.Models
 {
     public class GatewayInfo
     {
